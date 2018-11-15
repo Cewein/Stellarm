@@ -1,0 +1,34 @@
+CREATE TABLE ASTRE(
+name VARCHAR(20) PRIMARY KEY,
+
+
+
+);
+
+CREATE TABLE USER(
+id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+lieu VARCHAR(30),
+moment DATETIME,
+now BOOLEAN
+);
+
+CREATE TABLE CITY(
+name VARCHAR(30) PRIMARY KEY,
+latitude FLOAT,
+longitude FLOAT
+);
+
+Degrés décimaux
+INSERT INTO COUNTRY (name,latitude,longitude) VALUES ('Paris', 48.866667, 2.333333);
+INSERT INTO COUNTRY (name,latitude,longitude) VALUES ('Greenwich', 51.482576, -0.007658);
+INSERT INTO COUNTRY (name,latitude,longitude) VALUES ('Mexico', 19.432607, -99.133207);
+INSERT INTO COUNTRY (name,latitude,longitude) VALUES ('Montreal', 45.501688, -73.567255);
+INSERT INTO COUNTRY (name,latitude,longitude) VALUES ('Tokyo', 35.689487, 139.691706);
+INSERT INTO COUNTRY (name,latitude,longitude) VALUES ('Helsinki', 60.169855, 24.938379);
+INSERT INTO COUNTRY (name,latitude,longitude) VALUES ('Sydney', -33.868819, 151.209295);
+INSERT INTO COUNTRY (name,latitude,longitude) VALUES ('Bangkok', 13.756330, 100.501765);
+INSERT INTO COUNTRY (name,latitude,longitude) VALUES ('Machu Picchu', -13.154706, -72.525441);
+INSERT INTO COUNTRY (name,latitude,longitude) VALUES ('Le Caire', 30.044419, 31.235711);
+
+
+
