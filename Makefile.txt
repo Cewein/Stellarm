@@ -1,0 +1,26 @@
+CC = gcc
+CFLAGS = -Wall
+LDFLAGS = -lm
+EXEC = programme
+
+
+all: $(EXEC)
+
+$(EXEC) : source.o fonction.o
+	$(CC) $^ -o $@ $(LDFLAGS)
+
+source.o : fonction.h
+	$(CC) source.c -c $(CFLAGS)
+
+fonction.o : fonction.h
+	$(CC) fonction.c -c $(CFLAGS)
+
+clean:
+	rm -f *.o
+	rm -f *~
+
+delete: clean
+	rm -rf $(EXEC)
+
+phony: all clean
+	
