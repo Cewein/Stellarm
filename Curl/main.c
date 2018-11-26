@@ -1,5 +1,8 @@
+#pragma warning(disable : 4996)
+
 #include <stdio.h>
 #include <curl/curl.h>
+#include <string.h>
 
 #include "data.h"
 
@@ -18,7 +21,7 @@ int main(void)
 
 	curl = curl_easy_init();
 	if (curl) {
-		curl_easy_setopt(curl, CURLOPT_URL, "http://perdu.com/");
+		curl_easy_setopt(curl, CURLOPT_URL, "https://theskylive.com/planetarium?obj=moon");
 
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
@@ -32,8 +35,26 @@ int main(void)
 	}
 	else
 	{
-		//do stuff here
-		printf("%s", chunk.memory);
+		char * data;
+		data = chunk.memory;
+
+		data = strstr(data, "Object:");
+
+		char *end = data;
+		end = strstr(data, "</div>");
+		
+		printf("\n\n\nlength of data : %d\nlength of end : %d\n\n\n", strlen(data), strlen(end));
+
+		unsigned int length = strlen(data) - strlen(end);
+
+		printf("%d\n", length);
+
+		int i = 0;
+		while (i < length)
+		{
+			printf("%c", data[i]);
+			i++;
+		}
 	}
 
 	curl_easy_cleanup(curl);
