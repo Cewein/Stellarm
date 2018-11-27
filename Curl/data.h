@@ -6,3 +6,5 @@ struct MemoryStruct {
 };
 
 const unsigned int WriteMemoryCallback(void *contents, unsigned int size, unsigned int nmemb, void *userp);
+
+void printInfo(char * memory);

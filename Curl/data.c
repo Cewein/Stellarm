@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <curl/curl.h>
 #include "data.h"
 
@@ -21,4 +22,27 @@ const unsigned int WriteMemoryCallback(void *contents, unsigned int size, unsign
 	mem->memory[mem->size] = 0;
 
 	return realsize;
+}
+
+void printInfo(char * memory, char * name)
+{
+	char * data;
+	data = memory;
+
+	data = strstr(data, "Object:");
+	char * end = data;
+	end = strstr(data, "</div>");
+
+	unsigned int length = strlen(data) - strlen(end);
+
+	int i = 0;
+	int printing = 1;
+	while (i < length)
+	{
+		if (data[i - 1] == '>' || (data[i - 1] == 9 && data[i] != 9)) printing = 1;
+		if (data[i] == '<' || data[i] == 9) printing = 0;
+		if (printing == 1) printf("%c", data[i]);
+
+		i++;
+	}
 }
