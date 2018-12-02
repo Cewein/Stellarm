@@ -13,12 +13,19 @@ const char * vertexShader = "#version 450 core\n"
 		"gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
 	"}\n";
 
-const char * fragmentShader = "#version 450 core\n"
+const char * yellow = "#version 450 core\n"
 	"out vec4 fragcolor;\n"
 	"void main()\n"
 	"{\n"
 		"fragcolor = vec4(1.,1.,0.,1.);\n"
 	"}\n";
+
+const char * green = "#version 450 core\n"
+"out vec4 fragcolor;\n"
+"void main()\n"
+"{\n"
+"fragcolor = vec4(0.,1.,0.,1.);\n"
+"}\n";
 
 int main()
 {
@@ -87,18 +94,23 @@ int main()
 
 	//Here creating the fragment shader
 	unsigned int frgShdr;
+	unsigned int greenShdr;
 	
-	createFragmentShader(&frgShdr, fragmentShader);
+	createFragmentShader(&frgShdr, yellow);
+	createFragmentShader(&greenShdr, green);
 
 	//-------------- SHADER PROGRAM CREATION --------------//
 	//here linking all shader together
-	unsigned int shaderProgram;
+	unsigned int yellowProgram;
+	unsigned int greenProgram;
 	
-	createProgramShader(&shaderProgram, &vrtShdr, &frgShdr);
+	createProgramShader(&yellowProgram, &vrtShdr, &frgShdr);
+	createProgramShader(&greenProgram, &vrtShdr, &greenShdr);
 
 	//here deleting the old shader we don't need them anymore
 	glDeleteShader(vrtShdr);
 	glDeleteShader(frgShdr);
+	glDeleteShader(greenShdr);
 
 	//----------------- VERTEX ATTRIBUTE -----------------//
 	//telling OpenGL how to use the vertices array
@@ -115,10 +127,9 @@ int main()
 		glClearColor(0.5f, 0.0f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shaderProgram);
+		glUseProgram(yellowProgram);
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
 		//check and call event
