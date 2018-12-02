@@ -4,6 +4,7 @@
 
 #include "GLFWFunction.h"
 #include "OpenGLFunction.h"
+#include "ShaderFunction.h";
 
 const char * vertexShader = "#version 450 core\n"
 	"layout (location = 0) in vec3 aPos;\n"
@@ -81,29 +82,19 @@ int main()
 	//creating and compiling a shader
 	//Here creating the vertex shader
 	unsigned int vrtShdr;
-	vrtShdr = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vrtShdr, 1, &vertexShader, NULL);
-	glCompileShader(vrtShdr);
-
-	shaderCompilStat(vrtShdr, "VERTEX SHADER");
+	
+	createVertexShader(&vrtShdr, vertexShader);
 
 	//Here creating the fragment shader
 	unsigned int frgShdr;
-	frgShdr = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(frgShdr, 1, &fragmentShader, NULL);
-	glCompileShader(frgShdr);
-
-	shaderCompilStat(frgShdr, "FRAGMENT SHADER");
+	
+	createFragmentShader(&frgShdr, fragmentShader);
 
 	//-------------- SHADER PROGRAM CREATION --------------//
 	//here linking all shader together
 	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vrtShdr);
-	glAttachShader(shaderProgram, frgShdr);
-	glLinkProgram(shaderProgram);
-
-	programCompliStat(shaderProgram, "SHADER LINK PROGRAM");
+	
+	createProgramShader(&shaderProgram, &vrtShdr, &frgShdr);
 
 	//here deleting the old shader we don't need them anymore
 	glDeleteShader(vrtShdr);
@@ -126,7 +117,8 @@ int main()
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 3);
 		glBindVertexArray(0);
 
 		//check and call event
