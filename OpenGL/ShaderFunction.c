@@ -1,3 +1,4 @@
+#pragma warning(disable : 4996)
 #include "ShaderFunction.h"
 
 void createVertexShader(unsigned int * shader, const char * vertexShader)
@@ -28,3 +29,50 @@ void createProgramShader(unsigned int * program, unsigned int * vertex, unsigned
 	programCompliStat(*program, "SHADER LINK PROGRAM");
 }
 
+unsigned int addShader(char const * vertexFile, char const * fragmentFile)
+{
+	char * buffer = malloc(sizeof(char) * 250);
+
+	FILE * vertex;
+	vertex = fopen(vertexFile, "r");
+	FILE * fragment;
+	fragment = fopen(fragmentFile, "r");
+
+	if (vertex != NULL && fragment != NULL)
+	{
+		char * vertexShader = malloc(fsize(vertex) + 2 * sizeof(char));
+		char * fragmentShader = malloc(fsize(fragment)+ 2 * sizeof(char));
+
+		while (fgets(buffer, 250, vertex) != NULL)
+		{
+			strcat(vertexShader, buffer);
+		}
+
+		while (fgets(buffer, 250, fragment) != NULL)
+		{
+			strcat(fragmentShader, buffer);
+		}
+
+		strcat(vertexShader, "\0");
+		strcat(fragmentShader, "\0");
+
+		printf("%s\n%s\n", vertexShader, fragmentShader);
+
+
+		free(vertexShader);
+		free(fragmentShader);
+		free(buffer);	
+
+		fclose(vertex);
+		fclose(fragment);
+
+		return 1;
+	}
+	
+	free(buffer);
+
+	perror("fopen");
+	printf("No shader file found!");
+	
+	return 0;
+}

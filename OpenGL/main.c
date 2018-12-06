@@ -2,9 +2,11 @@
 #include <GLFW\glfw3.h>
 #include <stdio.h>
 
+#pragma warning(disable : 4996)
+
 #include "GLFWFunction.h"
 #include "OpenGLFunction.h"
-#include "ShaderFunction.h";
+#include "ShaderFunction.h"
 
 const char * vertexShader = "#version 450 core\n"
 	"layout (location = 0) in vec3 aPos;\n"
@@ -13,12 +15,7 @@ const char * vertexShader = "#version 450 core\n"
 		"gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
 	"}\n";
 
-const char * yellow = "#version 450 core\n"
-	"out vec4 fragcolor;\n"
-	"void main()\n"
-	"{\n"
-		"fragcolor = vec4(1.,1.,0.,1.);\n"
-	"}\n";
+const char * yellow = "#version 450 core\n out vec4 fragcolor;\n void main()\n {\n fragcolor = vec4(1.,1.,0.,1.);\n }\n";
 
 const char * green = "#version 450 core\n"
 "out vec4 fragcolor;\n"
@@ -28,7 +25,10 @@ const char * green = "#version 450 core\n"
 "}\n";
 
 int main()
-{
+{ 
+
+	unsigned int shader = addShader("shader\\vertex.vert", "shader\\Yellow.frag");
+
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
