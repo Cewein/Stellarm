@@ -18,4 +18,8 @@ void createFragmentShader(unsigned int * shader, const char * fragmentShader);
 
 void createProgramShader(unsigned int * progam, unsigned int * vertex, unsigned int * fragment);
 
-unsigned int addShader(const char * vertexFile, const char * fragmentFile);
+void addProgShader(char const * vertexFile, char const * fragmentFile, unsigned int * program);
+
+void const addInt(unsigned int progId, char * name, int value);
+
+void const addFloat(unsigned int progId, char * name, float value);

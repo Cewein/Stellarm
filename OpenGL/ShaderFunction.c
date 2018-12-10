@@ -29,50 +29,54 @@ void createProgramShader(unsigned int * program, unsigned int * vertex, unsigned
 	programCompliStat(*program, "SHADER LINK PROGRAM");
 }
 
-unsigned int addShader(char const * vertexFile, char const * fragmentFile)
+void addProgShader(char const * vertexFile, char const * fragmentFile, unsigned int * program)
 {
-	char * buffer = malloc(sizeof(char) * 250);
-
-	FILE * vertex;
-	vertex = fopen(vertexFile, "r");
-	FILE * fragment;
-	fragment = fopen(fragmentFile, "r");
+	//make file stream
+	FILE * vertex = NULL;
+	vertex = fopen(vertexFile, "rb");
+	FILE * fragment = NULL;
+	fragment = fopen(fragmentFile, "rb");
+	
+	//Here is were all the shader ID are define
+	unsigned int vertexShader;
+	unsigned int fragmentShader;
 
 	if (vertex != NULL && fragment != NULL)
 	{
-		char * vertexShader = malloc(fsize(vertex) + 2 * sizeof(char));
-		char * fragmentShader = malloc(fsize(fragment)+ 2 * sizeof(char));
+		char * vertexFile = freadInArray(vertex);
+		char * fragmentFile = freadInArray(fragment);
 
-		while (fgets(buffer, 250, vertex) != NULL)
-		{
-			strcat(vertexShader, buffer);
-		}
+		//link everything with above function
+		createVertexShader(&vertexShader, vertexFile);
+		createFragmentShader(&fragmentShader, fragmentFile);
+		createProgramShader(program, &vertexShader, &fragmentShader);
 
-		while (fgets(buffer, 250, fragment) != NULL)
-		{
-			strcat(fragmentShader, buffer);
-		}
-
-		strcat(vertexShader, "\0");
-		strcat(fragmentShader, "\0");
-
-		printf("%s\n%s\n", vertexShader, fragmentShader);
-
-
-		free(vertexShader);
-		free(fragmentShader);
-		free(buffer);	
+		free(vertexFile);
+		free(fragmentFile);
 
 		fclose(vertex);
 		fclose(fragment);
 
-		return 1;
+		//delete shader because the are compile in the program
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
+		
+		return;
 	}
-	
-	free(buffer);
 
 	perror("fopen");
 	printf("No shader file found!");
 	
-	return 0;
+	return;
 }
+
+void const addInt(unsigned int progId, char * name, int value)
+{
+	glUniform1i(glGetUniformLocation(progId, name), value);
+}
+
+void const addFloat(unsigned int progId, char * name, float value)
+{
+	glUniform1f(glGetUniformLocation(progId, name), value);
+}
+
