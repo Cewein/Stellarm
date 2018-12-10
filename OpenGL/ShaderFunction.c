@@ -1,3 +1,4 @@
+#pragma warning(disable : 4996)
 #include "ShaderFunction.h"
 
 void createVertexShader(unsigned int * shader, const char * vertexShader)
@@ -26,5 +27,56 @@ void createProgramShader(unsigned int * program, unsigned int * vertex, unsigned
 	glLinkProgram(*program);
 
 	programCompliStat(*program, "SHADER LINK PROGRAM");
+}
+
+void addProgShader(char const * vertexFile, char const * fragmentFile, unsigned int * program)
+{
+	//make file stream
+	FILE * vertex = NULL;
+	vertex = fopen(vertexFile, "rb");
+	FILE * fragment = NULL;
+	fragment = fopen(fragmentFile, "rb");
+	
+	//Here is were all the shader ID are define
+	unsigned int vertexShader;
+	unsigned int fragmentShader;
+
+	if (vertex != NULL && fragment != NULL)
+	{
+		char * vertexFile = freadInArray(vertex);
+		char * fragmentFile = freadInArray(fragment);
+
+		//link everything with above function
+		createVertexShader(&vertexShader, vertexFile);
+		createFragmentShader(&fragmentShader, fragmentFile);
+		createProgramShader(program, &vertexShader, &fragmentShader);
+
+		free(vertexFile);
+		free(fragmentFile);
+
+		fclose(vertex);
+		fclose(fragment);
+
+		//delete shader because the are compile in the program
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
+		
+		return;
+	}
+
+	perror("fopen");
+	printf("No shader file found!");
+	
+	return;
+}
+
+void const addInt(unsigned int progId, char * name, int value)
+{
+	glUniform1i(glGetUniformLocation(progId, name), value);
+}
+
+void const addFloat(unsigned int progId, char * name, float value)
+{
+	glUniform1f(glGetUniformLocation(progId, name), value);
 }
 

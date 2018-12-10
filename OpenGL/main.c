@@ -4,31 +4,10 @@
 
 #include "GLFWFunction.h"
 #include "OpenGLFunction.h"
-#include "ShaderFunction.h";
-
-const char * vertexShader = "#version 450 core\n"
-	"layout (location = 0) in vec3 aPos;\n"
-	"void main()\n"
-	"{\n"
-		"gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-	"}\n";
-
-const char * yellow = "#version 450 core\n"
-	"out vec4 fragcolor;\n"
-	"void main()\n"
-	"{\n"
-		"fragcolor = vec4(1.,1.,0.,1.);\n"
-	"}\n";
-
-const char * green = "#version 450 core\n"
-"out vec4 fragcolor;\n"
-"void main()\n"
-"{\n"
-"fragcolor = vec4(0.,1.,0.,1.);\n"
-"}\n";
+#include "ShaderFunction.h"
 
 int main()
-{
+{ 
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
@@ -55,10 +34,17 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	float vertices[] = {
-		-0.5, -0.5, 0.0, // bottom left
-		0.5, -0.5, 0.0, //bottom right
-		-0.5, 0.5, 0.0, // top left
-		0.5, 0.5, 0.0 // top right
+		 0.5, -0.5, 0.0,  0.0, 1.0, 0.0,  // bottom right
+		 0.5,  0.5, 0.0,  1.0, 0.0, 0.0,  // top right
+		-0.5, -0.5, 0.0,  0.0, 0.0, 1.0,  // bottom left
+		-0.5,  0.5, 0.0,  1.0, 1.0, 0.0   // top left
+	};
+
+	float texCoord[] = {
+		-0.5, -0.5, // bottom left
+		0.5, -0.5, //bottom right
+		-0.5, 0.5, // top left
+		0.5, 0.5 // top right
 	};
 	
 	unsigned int indices[] = {
@@ -85,37 +71,27 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	//---------------------- SHADER ----------------------//
-	//creating and compiling a shader
-	//Here creating the vertex shader
-	unsigned int vrtShdr;
-	
-	createVertexShader(&vrtShdr, vertexShader);
-
-	//Here creating the fragment shader
-	unsigned int frgShdr;
-	unsigned int greenShdr;
-	
-	createFragmentShader(&frgShdr, yellow);
-	createFragmentShader(&greenShdr, green);
-
 	//-------------- SHADER PROGRAM CREATION --------------//
 	//here linking all shader together
 	unsigned int yellowProgram;
-	unsigned int greenProgram;
 	
-	createProgramShader(&yellowProgram, &vrtShdr, &frgShdr);
-	createProgramShader(&greenProgram, &vrtShdr, &greenShdr);
-
-	//here deleting the old shader we don't need them anymore
-	glDeleteShader(vrtShdr);
-	glDeleteShader(frgShdr);
-	glDeleteShader(greenShdr);
+	addProgShader("shader\\vertex.vert", "shader\\Yellow.frag", &yellowProgram);
 
 	//----------------- VERTEX ATTRIBUTE -----------------//
 	//telling OpenGL how to use the vertices array
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	//------------------ TEXTURE OPTION ------------------//
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 
 
 	//------------------- RENDER  LOOP -------------------//
@@ -128,9 +104,12 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(yellowProgram);
+
+		float time = glfwGetTime();
+		addFloat(yellowProgram, "time", time);
+
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
 
 		//check and call event
 		glfwSwapBuffers(window);
