@@ -5,6 +5,7 @@
 #include "GLFWFunction.h"
 #include "OpenGLFunction.h"
 #include "ShaderFunction.h"
+#include "glTexture.h"
 
 int main()
 { 
@@ -34,23 +35,17 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	float vertices[] = {
-		 0.5, -0.5, 0.0,  0.0, 1.0, 0.0,  // bottom right
-		 0.5,  0.5, 0.0,  1.0, 0.0, 0.0,  // top right
-		-0.5, -0.5, 0.0,  0.0, 0.0, 1.0,  // bottom left
-		-0.5,  0.5, 0.0,  1.0, 1.0, 0.0   // top left
-	};
-
-	float texCoord[] = {
-		-0.5, -0.5, // bottom left
-		0.5, -0.5, //bottom right
-		-0.5, 0.5, // top left
-		0.5, 0.5 // top right
+		// positions          // colors           // texture coords
+		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
 	};
 	
 	unsigned int indices[] = {
-		0,1,2,
-		3,2,1
-	};
+		0, 1, 3, // first triangle
+		1, 2, 3  // second triangle
+	};;
 
 	//---------------------- BUFFER ----------------------//
 	//creating buffer
@@ -79,20 +74,25 @@ int main()
 
 	//----------------- VERTEX ATTRIBUTE -----------------//
 	//telling OpenGL how to use the vertices array
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 	//------------------ TEXTURE OPTION ------------------//
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	unsigned int wallTexture;
+	createTexture(&wallTexture, "texture\\wall.jpg", FALSE);
+	unsigned int happyFace;
+	createTexture(&happyFace, "texture\\awesomeface.png", TRUE);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//because we use multiple texture set a number for each texture (cannot be the same)
+	glUseProgram(yellowProgram);
 
-
+	addInt(yellowProgram, "wallTexture", 0);
+	addInt(yellowProgram, "happyFace", 1);
 
 	//------------------- RENDER  LOOP -------------------//
 	while (!glfwWindowShouldClose(window))
@@ -102,12 +102,17 @@ int main()
 		//rendering
 		glClearColor(0.5f, 0.0f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-
+		//set multiple texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, wallTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, happyFace);
+		//use shader programe and stuff to it
 		glUseProgram(yellowProgram);
 
 		float time = glfwGetTime();
 		addFloat(yellowProgram, "time", time);
-
+		//draw
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -115,6 +120,10 @@ int main()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 
 	glfwTerminate();
 	return 0;
