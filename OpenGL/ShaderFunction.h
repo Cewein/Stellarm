@@ -6,12 +6,6 @@
 #include "OpenGLFunction.h"
 #include "libFull.h"
 
-struct shader {
-
-	unsigned int ID;
-
-};
-
 void createVertexShader(unsigned int * shader, const char * vertexShader);
 
 void createFragmentShader(unsigned int * shader, const char * fragmentShader);
