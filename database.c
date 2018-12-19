@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "database.h"
-#define _CRT_SECURE_NO_WARNINGS
 
+///////////  FONCTIONS FOR USE MYSQL MORE EASYLY /////////////
 
 // FUNCTIONS FOR INSERT VALUES IN A STRING
 // valuesInsert : Permite to insert many values in a string

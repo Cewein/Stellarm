@@ -1,6 +1,6 @@
 #pragma once
-#include <stdlib.h>
-#include <stdio.h>
+
+#include "database.h"
 
 double hourdecimal(double hour, double min, double sec);
 double* hourreal(double hour);
@@ -17,29 +17,10 @@ double anomalieSol(double T, char type);
 double anomalieMoon(double T, char type);
 double longitudeNoeudMoon(double T, char type);
 double* obliquite(double T);
-double longitudeMoonForMoon(double T, char type);
-double anomalieSolForMoon(double T, char type);
-double anomalieMoonForMoon(double T, char type);
-double elongationForMoon(double T, char type);
-double distanceForMoon(double T, char type);
-double a1(double T, char type);
-double a2(double T, char type);
-double a3(double T, char type);
-double sigmaL(double T);
-double sigmaB(double T);
-double longitudeEcliptique(double T);
-double latitudeEcliptique(double T);
-double anomalieSolForSol(double T, char type);
-//double excentriciteForSol(double T, char type);
-double centreSol(double T, double anomalie, char type);
-double reallongitudeSol(double T);
-double omegaSol(double T, char type);
-double viewLongitudeSol(double T);
-double* ascensionDroiteSol(double longitude, double* oblique);
-double* declinaisonSol(double longitude, double* oblique);
+
 double* TransformInLongitudeEquatorial(double longitude, double latitude, double* oblique);
 double* TransformInLatitudeEquatorial(double longitude, double latitude, double* oblique);
 double horaireAngle(double* ascension, double* longitudeDeg, double* sideral);
-double azimut(char* astre, double year, double month, double day, double hour, double min, double sec, double* latitude, double* longitude);
-double hauteur(char* astre, double year, double month, double day, double hour, double min, double sec, double* latitude, double* longitude);
+double azimut(MYSQL *mysql, char* astre, double year, double month, double day, double hour, double min, double sec, double* latitude, double* longitude);
+double hauteur(MYSQL *mysql, char* astre, double year, double month, double day, double hour, double min, double sec, double* latitude, double* longitude);
 
