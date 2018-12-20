@@ -13,6 +13,8 @@
 
 int main()
 { 
+	//FILE * logFile = NULL;
+
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
@@ -146,8 +148,19 @@ int main()
 	//------------------- RENDER  LOOP -------------------//
 	
 	vec3 axe = { .5, 1., 0. };
-	vec3 axeView = { 0., 0., -3. };
-	vec3 redu = { 0.5,0.5,0.5 };
+	vec3 axeView = { 0., 0., 0. };
+	vec3 redu = { 0.7,0.7,0.7 };
+
+	//camera
+	vec3 camPos = { 0.,0.,3. };
+	vec3 camTarget = { 0., 0., 0. };
+	vec3 normalize; glm_vec3_sub(camPos, camTarget, normalize);
+	vec3 camDirection; glm_normalize_to(normalize, camDirection);
+	vec3 up = { 0.,1.,0. };
+	glm_cross(up, camDirection, normalize);
+	vec3 camRightAxe; glm_normalize_to(normalize, camRightAxe);
+	vec3 camUpAxe; glm_cross(camDirection, camRightAxe, camUpAxe);
+
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -172,23 +185,38 @@ int main()
 		addFloat(yellowProgram, "time", time);
 
 		//create matrix for move the cube, cam and lens setting
-		mat4 trans = GLM_MAT4_IDENTITY_INIT;
 		mat4 view = GLM_MAT4_IDENTITY_INIT;
+		float radius = 10.f;
+		float camX = sinf(time) * radius;
+		float camZ = cosf(time) * radius;
+		
+		vec3 eye = { camX, 0.0, camZ };
+		glm_lookat(eye, camTarget, up, view);
+
 		mat4 projection = GLM_MAT4_IDENTITY_INIT;
 
 		glm_translate(view, axeView);
 		glm_perspective(glm_rad(45.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.f, projection);
-		glm_scale(trans, redu);
-		glm_rotate(trans, glm_rad(50.f) * time, axe);
+		
 
 		//send the matrix to the shader
-		glUniformMatrix4fv(glGetUniformLocation(yellowProgram, "transform"), 1, GL_FALSE, trans[0]);
 		glUniformMatrix4fv(glGetUniformLocation(yellowProgram, "view"), 1, GL_FALSE, view[0]);
 		glUniformMatrix4fv(glGetUniformLocation(yellowProgram, "projection"), 1, GL_FALSE, projection[0]);
 
 		//draw
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES,0, 36);
+		for (int i = 0; i < 10; i++)
+		{
+			mat4 trans = GLM_MAT4_IDENTITY_INIT;
+
+			glm_translate(trans, cubePos[i]);
+			glm_rotate(trans, glm_rad(10.f * i) * time, axe);
+			//glm_scale(trans, redu);
+
+			glUniformMatrix4fv(glGetUniformLocation(yellowProgram, "transform"), 1, GL_FALSE, trans[0]);
+			glDrawArrays(GL_TRIANGLES,0, 36);
+		}
+
 
 		//check and call event
 		glfwSwapBuffers(window);
@@ -200,5 +228,6 @@ int main()
 	glDeleteBuffers(1, &EBO);
 
 	glfwTerminate();
+
 	return 0;
 }

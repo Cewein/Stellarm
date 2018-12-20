@@ -1,3 +1,4 @@
+#pragma warning(disable : 4996)
 #include "libFull.h"
 
 //return the size of a file for malloc into a char *
@@ -24,4 +25,27 @@ char * freadInArray(FILE * fp)
 	free(buffer);
 	
 	return fileArray;
+}
+
+void logInFile(char * description, char * name, int type, FILE * fp)
+{
+	if (fp == NULL) fp = fopen("log.txt", "a");
+	switch (type)
+	{
+		case 1:
+			fputs("[warning]", fp);
+			break;
+		case 2:
+			fputs("[ error ]", fp);
+			break;
+		default:
+			fputs("[default]", fp);
+			break;
+	}
+
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+
+	fprintf(fp, " - %d-%d-%d %d:%d:%d - %s : %s\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, name, description);
+	fclose(fp);
 }
