@@ -11,6 +11,10 @@
 #define SCR_WIDTH 800
 #define SCR_HEIGHT 600
 
+vec3 cameraPos = { 0.0f, 0.0f, 3.0f };
+vec3 cameraFront = { 0.0f, 0.0f, -1.0 };
+vec3 cameraUp = { 0.0f, 1.0f, 0.0f };
+
 int main()
 { 
 	//FILE * logFile = NULL;
@@ -147,18 +151,19 @@ int main()
 
 	//------------------- RENDER  LOOP -------------------//
 	
-	vec3 axe = { .5, 1., 0. };
-	vec3 axeView = { 0., 0., 0. };
+
 	vec3 redu = { 0.7,0.7,0.7 };
 
 	//camera
+	vec3 axe = { .5, 1., 0. };
+	vec3 axeView = { 0., 0., 0. };
 	vec3 camPos = { 0.,0.,3. };
 	vec3 camTarget = { 0., 0., 0. };
-	vec3 normalize; glm_vec3_sub(camPos, camTarget, normalize);
-	vec3 camDirection; glm_normalize_to(normalize, camDirection);
+	vec3 camDirection; glm_vec3_sub(camPos, camTarget, camDirection);
+	glm_normalize(camDirection);
 	vec3 up = { 0.,1.,0. };
-	glm_cross(up, camDirection, normalize);
-	vec3 camRightAxe; glm_normalize_to(normalize, camRightAxe);
+	vec3 camRightAxe;  glm_cross(up, camDirection, camRightAxe);
+	glm_normalize(camRightAxe);
 	vec3 camUpAxe; glm_cross(camDirection, camRightAxe, camUpAxe);
 
 
