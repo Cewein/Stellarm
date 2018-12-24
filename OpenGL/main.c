@@ -11,6 +11,26 @@
 #define SCR_WIDTH 800
 #define SCR_HEIGHT 600
 
+void mouseCallBack(GLFWwindow * window, double xpos, double ypos);
+
+//this need to be acces in many function internal of external 
+Camera camera = {
+	.view = GLM_MAT4_IDENTITY_INIT,
+	.pos = { 0.f,0.f,3.f },
+	.target = { 0.f, 0.f, 0.f },
+	.upAxe = { 0.0f, 1.0f, 0.0f },
+	.front = { 0.0f, 0.0f, -1.0 },
+
+	.yaw = -90.f,
+	.pitch = 0.f,
+
+	.lastX = SCR_HEIGHT / 2,
+	.lastY = SCR_WIDTH / 2,
+
+	.lastFrame = 0.0f,
+	.deltaTime = 0.0f
+};
+
 int main()
 { 
 	//FILE * logFile = NULL;
@@ -40,6 +60,7 @@ int main()
 	glViewport(0, 0, 800, 600);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+	glfwSetCursorPosCallback(window, mouseCallBack);
 	//---------------------- SHAPES ----------------------//
 	//this is a cube
 	float cube[] = {
@@ -152,28 +173,10 @@ int main()
 	vec3 redu = { 0.7f,0.7f,0.7f };
 	vec3 axeRota = { .5f, 1.f, 0.f };
 
-	Camera camera = {
-			.view = GLM_MAT4_IDENTITY_INIT,
-			.pos = { 0.f,0.f,3.f },
-			.target = { 0.f, 0.f, 0.f },
-			.upAxe = { 0.0f, 1.0f, 0.0f },
-			.front = { 0.0f, 0.0f, -1.0 }
-	};
-
-	camera.yaw = 0.f;
-	camera.pitch = 0.f;
-
-	camera.lastX = SCR_HEIGHT / 2;
-	camera.lastY = SCR_WIDTH / 2;
-
-	camera.lastFrame = 0.0f;
-	camera.deltaTime = 0.0f;
-
 	while (!glfwWindowShouldClose(window))
 	{
 		//input
 		processInput(window, &camera);
-		processMouse(window, &camera);
 
 		//rendering
 		glClearColor(0.5f, 0.0f, 0.5f, 1.0f);
@@ -235,4 +238,32 @@ int main()
 	glfwTerminate();
 
 	return 0;
+}
+
+void mouseCallBack(GLFWwindow * window, double xpos, double ypos)
+{
+
+	float xoffset = xpos - camera.lastX;
+	float yoffset = camera.lastY - ypos;
+
+	camera.lastX = xpos;
+	camera.lastY = ypos;
+
+	float sensivity = 0.05f;
+	xoffset *= sensivity;
+	yoffset *= sensivity;
+
+	camera.yaw += xoffset;
+	camera.pitch += yoffset;
+
+	if (camera.pitch > 89.f) camera.pitch = 89.f;
+	if (camera.pitch < -89.f) camera.pitch = -89.f;
+
+	vec3 front;
+	front[0] = cos(glm_rad(camera.yaw)) * cos(glm_rad(camera.pitch));
+	front[1] = sin(glm_rad(camera.pitch));
+	front[2] = sin(glm_rad(camera.yaw)) * cos(glm_rad(camera.pitch));
+
+	glm_normalize_to(front, camera.front);
+	
 }
