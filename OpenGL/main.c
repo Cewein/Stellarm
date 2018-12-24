@@ -11,10 +11,6 @@
 #define SCR_WIDTH 800
 #define SCR_HEIGHT 600
 
-vec3 cameraPos = { 0.0f, 0.0f, 3.0f };
-vec3 cameraFront = { 0.0f, 0.0f, -1.0 };
-vec3 cameraUp = { 0.0f, 1.0f, 0.0f };
-
 int main()
 { 
 	//FILE * logFile = NULL;
@@ -42,6 +38,7 @@ int main()
 	}
 
 	glViewport(0, 0, 800, 600);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 	//---------------------- SHAPES ----------------------//
 	//this is a cube
@@ -123,9 +120,9 @@ int main()
 
 	//-------------- SHADER PROGRAM CREATION --------------//
 	//here linking all shader together
-	unsigned int yellowProgram;
+	unsigned int shaderProgram;
 	
-	addProgShader("shader\\vertex.glsl", "shader\\Yellow.glsl", &yellowProgram);
+	addProgShader("shader\\vertex.glsl", "shader\\Yellow.glsl", &shaderProgram);
 
 	//----------------- VERTEX ATTRIBUTE -----------------//
 	//telling OpenGL how to use the vertices array
@@ -144,33 +141,39 @@ int main()
 	createTexture(&happyFace, "texture\\awesomeface.png", TRUE);
 
 	//because we use multiple texture set a number for each texture (cannot be the same)
-	glUseProgram(yellowProgram);
+	glUseProgram(shaderProgram);
 
-	addInt(yellowProgram, "wallTexture", 0);
-	addInt(yellowProgram, "happyFace", 1);
+	addInt(shaderProgram, "wallTexture", 0);
+	addInt(shaderProgram, "happyFace", 1);
 
 	//------------------- RENDER  LOOP -------------------//
 	
 
-	vec3 redu = { 0.7,0.7,0.7 };
+	vec3 redu = { 0.7f,0.7f,0.7f };
+	vec3 axeRota = { .5f, 1.f, 0.f };
 
-	//camera
-	vec3 axe = { .5, 1., 0. };
-	vec3 axeView = { 0., 0., 0. };
-	vec3 camPos = { 0.,0.,3. };
-	vec3 camTarget = { 0., 0., 0. };
-	vec3 camDirection; glm_vec3_sub(camPos, camTarget, camDirection);
-	glm_normalize(camDirection);
-	vec3 up = { 0.,1.,0. };
-	vec3 camRightAxe;  glm_cross(up, camDirection, camRightAxe);
-	glm_normalize(camRightAxe);
-	vec3 camUpAxe; glm_cross(camDirection, camRightAxe, camUpAxe);
+	Camera camera = {
+			.view = GLM_MAT4_IDENTITY_INIT,
+			.pos = { 0.f,0.f,3.f },
+			.target = { 0.f, 0.f, 0.f },
+			.upAxe = { 0.0f, 1.0f, 0.0f },
+			.front = { 0.0f, 0.0f, -1.0 }
+	};
 
+	camera.yaw = 0.f;
+	camera.pitch = 0.f;
+
+	camera.lastX = SCR_HEIGHT / 2;
+	camera.lastY = SCR_WIDTH / 2;
+
+	camera.lastFrame = 0.0f;
+	camera.deltaTime = 0.0f;
 
 	while (!glfwWindowShouldClose(window))
 	{
 		//input
-		processInput(window);
+		processInput(window, &camera);
+		processMouse(window, &camera);
 
 		//rendering
 		glClearColor(0.5f, 0.0f, 0.5f, 1.0f);
@@ -183,30 +186,27 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, happyFace);
 
 		//use shader program
-		glUseProgram(yellowProgram);
+		glUseProgram(shaderProgram);
 
 		//add number, vector and matrix to shader
 		float time = glfwGetTime();
-		addFloat(yellowProgram, "time", time);
+		addFloat(shaderProgram, "time", time);
+
+		camera.deltaTime = time - camera.lastFrame;
+		camera.lastFrame = time;
 
 		//create matrix for move the cube, cam and lens setting
-		mat4 view = GLM_MAT4_IDENTITY_INIT;
-		float radius = 10.f;
-		float camX = sinf(time) * radius;
-		float camZ = cosf(time) * radius;
-		
-		vec3 eye = { camX, 0.0, camZ };
-		glm_lookat(eye, camTarget, up, view);
+		glm_vec3_add(camera.pos, camera.front, camera.target);
+		glm_lookat(camera.pos, camera.target, camera.upAxe, camera.view);
 
 		mat4 projection = GLM_MAT4_IDENTITY_INIT;
 
-		glm_translate(view, axeView);
 		glm_perspective(glm_rad(45.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.f, projection);
 		
 
 		//send the matrix to the shader
-		glUniformMatrix4fv(glGetUniformLocation(yellowProgram, "view"), 1, GL_FALSE, view[0]);
-		glUniformMatrix4fv(glGetUniformLocation(yellowProgram, "projection"), 1, GL_FALSE, projection[0]);
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, camera.view[0]);
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, projection[0]);
 
 		//draw
 		glBindVertexArray(VAO);
@@ -215,10 +215,10 @@ int main()
 			mat4 trans = GLM_MAT4_IDENTITY_INIT;
 
 			glm_translate(trans, cubePos[i]);
-			glm_rotate(trans, glm_rad(10.f * i) * time, axe);
+			glm_rotate(trans, glm_rad(10.f * i) * time, axeRota);
 			//glm_scale(trans, redu);
 
-			glUniformMatrix4fv(glGetUniformLocation(yellowProgram, "transform"), 1, GL_FALSE, trans[0]);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "transform"), 1, GL_FALSE, trans[0]);
 			glDrawArrays(GL_TRIANGLES,0, 36);
 		}
 
