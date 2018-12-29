@@ -153,21 +153,18 @@ int main()
 	vec3 axeRota = { .5f, 1.f, 0.f };
 
 	Camera camera = {
-			.view = GLM_MAT4_IDENTITY_INIT,
-			.pos = { 0.f,0.f,3.f },
-			.target = { 0.f, 0.f, 0.f },
-			.upAxe = { 0.0f, 1.0f, 0.0f },
-			.front = { 0.0f, 0.0f, -1.0 }
+		.view = GLM_MAT4_IDENTITY_INIT,
+		.pos = { 0.f,0.f,3.f },
+		.target = { 0.f, 0.f, 0.f },
+		.upAxe = { 0.0f, 1.0f, 0.0f },
+		.front = { 0.0f, 0.0f, -1.0 },
+		.yaw = -90.f,
+		.pitch = 0.f,
+		.lastX = (float)SCR_HEIGHT / 2,
+		.lastY = (float)SCR_WIDTH / 2,
+		.lastFrame = 0.0f,
+		.deltaTime = 0.0f
 	};
-
-	camera.yaw = 0.f;
-	camera.pitch = 0.f;
-
-	camera.lastX = SCR_HEIGHT / 2;
-	camera.lastY = SCR_WIDTH / 2;
-
-	camera.lastFrame = 0.0f;
-	camera.deltaTime = 0.0f;
 
 	while (!glfwWindowShouldClose(window))
 	{

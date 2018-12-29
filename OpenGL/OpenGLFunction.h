@@ -10,14 +10,17 @@ typedef struct Cams {
 	float deltaTime;
 	float lastFrame;
 
+	//pos of the 2d cam
 	double lastX;
 	double lastY;
 
-	float yaw;
+	//angle of the cam
+	float yaw; 
 	float pitch;
 
 	mat4 view; //this is the view of the window
 
+	//vec of the cam
 	vec3 pos; //pos of cam
 	vec3 target; // where do the cam look
 	vec3 direction;
