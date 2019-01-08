@@ -80,3 +80,23 @@ void const addFloat(unsigned int progId, char * name, float value)
 	glUniform1f(glGetUniformLocation(progId, name), value);
 }
 
+void const addVec3(unsigned int progId, char * name, vec3 value)
+{
+	glUniform3fv(glGetUniformLocation(progId, name), 1, value);
+}
+
+void const addVec4(unsigned int progId, char * name, vec4 value)
+{
+	glUniform4fv(glGetUniformLocation(progId, name), 1, value);
+}
+
+void const addMat3(unsigned int progId, char * name, mat3 value)
+{
+	glUniformMatrix3fv(glGetUniformLocation(progId, name), 1, GL_FALSE, value[0]);
+}
+
+void const addMat4(unsigned int progId, char * name, mat4 value)
+{
+	glUniformMatrix4fv(glGetUniformLocation(progId, name), 1, GL_FALSE, value[0]);
+}
+
