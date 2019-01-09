@@ -4,7 +4,9 @@
 #include <string.h>
 #include <cglm/cglm.h>
 
-///this struct is a OpenGL cam, it need everything for a camera in openGL in C
+/*!
+this struct is a OpenGL cam, it need everything for a camera in openGL in C
+*/
 typedef struct Cams {
 	//time for the cam
 	float deltaTime;
