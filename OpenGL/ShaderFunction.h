@@ -15,5 +15,8 @@ void createProgramShader(unsigned int * progam, unsigned int * vertex, unsigned 
 void addProgShader(char const * vertexFile, char const * fragmentFile, unsigned int * program);
 
 void const addInt(unsigned int progId, char * name, int value);
-
 void const addFloat(unsigned int progId, char * name, float value);
+void const addVec3(unsigned int progId, char * name, vec3 value);
+void const addVec4(unsigned int progId, char * name, vec4 value);
+void const addMat3(unsigned int progId, char * name, mat3 value);
+void const addMat4(unsigned int progId, char * name, mat4 value);
