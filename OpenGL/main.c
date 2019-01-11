@@ -12,8 +12,8 @@
 #include "glTexture.h"
 #include "lightGL.h"
 
-#define SCR_WIDTH 800
-#define SCR_HEIGHT 600
+#define SCR_WIDTH 1200
+#define SCR_HEIGHT 1000
 
 int main()
 {
@@ -91,19 +91,6 @@ int main()
 	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 	};
 
-	vec3 cubePos[] = {
-	{ 0.0f,  0.0f,  0.0f  },
-	{ 2.0f,  5.0f, -15.0f },
-	{ -1.5f, -2.2f, -2.5f },
-	{ -3.8f, -2.0f, -12.3f},
-	{ 2.4f, -0.4f, -3.5f  },
-	{ -1.7f,  3.0f, -7.5f },
-	{ 1.3f, -2.0f, -2.5f  },
-	{ 1.5f,  2.0f, -2.5f  },
-	{ 1.5f,  0.2f, -1.5f  },
-	{ -1.3f,  1.0f, -1.5f }
-	};
-
 	/////////////////////// LOADING OBJ /////////////////////// 
 
 	tinyobj_attrib_t attrib;
@@ -115,7 +102,7 @@ int main()
 	int data_len = 0;
 
 	FILE * objFile = NULL;
-	objFile = fopen("cube.obj", "rb");
+	objFile = fopen("JUPITER.obj", "rb");
 
 	data_len = fsize(objFile);
 	char * data = freadInArray(objFile);
@@ -123,37 +110,45 @@ int main()
 	unsigned int flags = TINYOBJ_FLAG_TRIANGULATE;
 	int ret = tinyobj_parse_obj(&attrib, &shapes, &num_shapes, &materials, &num_materials, data, data_len, flags);
 
-	printf("# of shapes     = %d\n", (int)num_shapes);
-	printf("# of materials  = %d\n", (int)num_materials);
-	printf("# of vertices   = %d\n", (int)attrib.num_vertices);
-	printf("# of face       = %d\n", (int)attrib.num_faces);
-	//printf("name diffure    = %s\n", materials->diffuse_texname);
-	printf("sizeof vertices = %d\n", sizeof(float) * attrib.num_vertices);
-	printf("sizeof cube arr = %d\n", sizeof(cube));
+	float * cubeArray = malloc(sizeof(float) * 8 * attrib.num_faces);
 
-	for (int i = 0; i < attrib.num_face_num_verts; i++) printf("indice %d : %f\n", i, attrib.material_ids[i]);
+	for (int i = 0; i < attrib.num_faces; i++)
+	{
+		int v = attrib.faces[i].v_idx;
+		int vt = attrib.faces[i].vt_idx;
+		int vn = attrib.faces[i].vn_idx;
 
+		cubeArray[i * 8] = attrib.vertices[v * 3 + 0];
+		cubeArray[i * 8 + 1] = attrib.vertices[v * 3 + 1];
+		cubeArray[i * 8 + 2] = attrib.vertices[v * 3 + 2];
+		cubeArray[i * 8 + 3] = attrib.normals[vn * 3 + 0];
+		cubeArray[i * 8 + 4] = attrib.normals[vn * 3 + 1];
+		cubeArray[i * 8 + 5] = attrib.normals[vn * 3 + 2];
+		cubeArray[i * 8 + 6] = attrib.texcoords[vt * 2 + 0];
+		cubeArray[i * 8 + 7] = attrib.texcoords[vt * 2 + 1];
+	}
 
-	///////////////////////////////////////////////////////////
-
-	unsigned int jupElm;
 	unsigned int jupVBO;
 	unsigned int jupVAO;
 
 	{
 		glGenVertexArrays(1, &jupVAO);
 		glGenBuffers(1, &jupVBO);
-		glGenBuffers(1, &jupElm);
 
 		glBindVertexArray(jupVAO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, jupVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * attrib.num_vertices, attrib.vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8 * attrib.num_faces, cubeArray, GL_STATIC_DRAW);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, jupElm);
-		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, attrib.);
-
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
 	}
+
+	///////////////////////////////////////////////////////////
 
 
 	//---------------------- BUFFER ----------------------//
@@ -206,7 +201,6 @@ int main()
 	
 	addProgShader("shader\\vertex.glsl", "shader\\texture.glsl", &shaderProgram);
 	addProgShader("shader\\vertexNotexture.glsl", "shader\\lightFrag.glsl", &lightProgram);
-	addProgShader("shader\\vertexNotexture.glsl", "shader\\lightFrag.glsl", &jupProg);
 
 
 	//------------------ TEXTURE OPTION ------------------//
@@ -215,31 +209,33 @@ int main()
 	unsigned int boxSpecular;
 	unsigned int boxEmissive;
 
-	createTexture(&boxTexture, "texture\\container2.png", FALSE);
-	createTexture(&boxSpecular, "texture\\container2_specular.png", FALSE);
-	createTexture(&boxEmissive, "texture\\matrix.jpg", FALSE);
+	unsigned int juptexture;
+
+	materials->diffuse_texname = removeEnter(materials->diffuse_texname);
+	createTexture(&juptexture, materials->diffuse_texname, TRUE);
 
 	//because we use multiple texture set a number for each texture (cannot be the same)
 	glUseProgram(shaderProgram);
 
 	addInt(shaderProgram, "material.diffuse", 0);
 	addInt(shaderProgram, "material.specular", 1);
-	addInt(shaderProgram, "material.emissive", 2);
 
+	//glUseProgram(jupProg);
 	//------------------- RENDER  LOOP -------------------//
 	
 
 	vec3 redu = { 0.2f,0.2f,0.2f };
 	vec3 axeRota = { .5f, 1.f, 0.f };
+	vec3 zero = GLM_VEC3_ZERO_INIT;
 
 	Camera camera = {
 		.view = GLM_MAT4_IDENTITY_INIT,
-		.pos = { 0.f,0.f,3.f },
+		.pos = { 0.f,2.f,3.f },
 		.target = { 0.f, 0.f, 0.f },
 		.upAxe = { 0.0f, 1.0f, 0.0f },
 		.front = { 0.0f, 0.0f, -1.0 },
 		.yaw = -90.f,
-		.pitch = 0.f,
+		.pitch = -45.f,
 		.lastX = (float)SCR_HEIGHT / 2,
 		.lastY = (float)SCR_WIDTH / 2,
 		.lastFrame = 0.0f,
@@ -251,12 +247,12 @@ int main()
 		.ambiant = { 0.2f, 0.2f, 0.2f },
 		.specular = { 1.f, 1.f, 1.f },
 		.direction = { -0.2f, -1.0f, -0.3f},
-		.position = { 0.0f, 1.0f, 5.0f },
+		.position = { 0.0f, 0.0f, -20.0f },
 		.watcher = { camera.pos[0],camera.pos[2], camera.pos[2] },
 
-		.constant = 1.0f,
+		.constant = .01f,
 		.linear = .09f,
-		.quadratic = 0.0032f
+		.quadratic = 0.00032f
 
 	};
 
@@ -267,16 +263,10 @@ int main()
 		processMouse(window, &camera);
 
 		//rendering
-		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//set multiple texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, boxTexture);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, boxSpecular);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, boxEmissive);
 
 		//use shader program
 		glUseProgram(shaderProgram);
@@ -303,22 +293,25 @@ int main()
 		addMat4(shaderProgram, "projection", projection);
 
 		//draw
-		glBindVertexArray(cubeVAO);
-		for (int i = 0; i < 10; i++)
-		{
-			mat4 trans = GLM_MAT4_IDENTITY_INIT;
 
-			glm_translate(trans, cubePos[i]);
-			glm_rotate(trans, glm_rad(10.f * i) * time, axeRota);
-			//glm_scale(trans, redu);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, juptexture);
 
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "transform"), 1, GL_FALSE, trans[0]);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		glBindVertexArray(jupVAO);
+		mat4 jupPos = GLM_MAT4_IDENTITY_INIT;
+
+		addMat4(shaderProgram, "transform", jupPos);
+
+		glDrawArrays(GL_TRIANGLES, 0, attrib.num_faces);
+
 
 		glUseProgram(lightProgram);
 		glBindVertexArray(lightVAO);
 		mat4 lightPosRedu = GLM_MAT4_IDENTITY_INIT;
+
+		vec3 yup = { 0.,1.,0.0 };
+		glm_rotate_at(lightPosRedu, zero, glm_rad(0.1f), yup);
+		glm_vec3_rotate_m4(lightPosRedu, light.position, light.position, light.position);
 
 		glm_translate(lightPosRedu, light.position);
 		glm_scale(lightPosRedu, redu);
@@ -327,7 +320,7 @@ int main()
 		addMat4(lightProgram, "projection", projection);
 		addMat4(lightProgram, "transform", lightPosRedu);
 
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 36);
 
 		//check and call event
 		glfwSwapBuffers(window);
@@ -337,6 +330,8 @@ int main()
 	tinyobj_attrib_free(&attrib);
 	tinyobj_shapes_free(shapes, num_shapes);
 	tinyobj_materials_free(materials, num_materials);
+
+	free(cubeArray);
 
 	glDeleteVertexArrays(1, &cubeVAO);
 	glDeleteVertexArrays(1, &lightProgram);
