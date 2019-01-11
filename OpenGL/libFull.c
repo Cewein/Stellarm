@@ -49,3 +49,16 @@ void logInFile(char * description, char * name, int type, FILE * fp)
 	fprintf(fp, " - %d-%d-%d %d:%d:%d - %s : %s\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, name, description);
 	fclose(fp);
 }
+
+char * removeEnter(char * text)
+{
+	int i = 0;
+	printf("\n");
+	while (text[i] != '\n')
+	{
+		printf("indice %d : %c\n", i, text[i]);
+		i++;
+	}
+	text[i] = '\0';
+	return text;
+}
