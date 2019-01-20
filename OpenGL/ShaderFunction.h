@@ -20,3 +20,4 @@ void const addVec3(unsigned int progId, char * name, vec3 value);
 void const addVec4(unsigned int progId, char * name, vec4 value);
 void const addMat3(unsigned int progId, char * name, mat3 value);
 void const addMat4(unsigned int progId, char * name, mat4 value);
+float getAddTime(unsigned int progId);

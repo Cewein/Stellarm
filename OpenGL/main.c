@@ -128,16 +128,16 @@ int main()
 		cubeArray[i * 8 + 7] = attrib.texcoords[vt * 2 + 1];
 	}
 
-	unsigned int jupVBO;
-	unsigned int jupVAO;
+	unsigned int shpereVBO;
+	unsigned int shpereVAO;
 
 	{
-		glGenVertexArrays(1, &jupVAO);
-		glGenBuffers(1, &jupVBO);
+		glGenVertexArrays(1, &shpereVAO);
+		glGenBuffers(1, &shpereVBO);
 
-		glBindVertexArray(jupVAO);
+		glBindVertexArray(shpereVAO);
 
-		glBindBuffer(GL_ARRAY_BUFFER, jupVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, shpereVBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8 * attrib.num_faces, cubeArray, GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -197,22 +197,22 @@ int main()
 	//here linking all shader together
 	unsigned int shaderProgram;
 	unsigned int lightProgram;
-	unsigned int jupProg;
+	unsigned int backgroundShader;
 	
 	addProgShader("shader\\vertex.glsl", "shader\\texture.glsl", &shaderProgram);
 	addProgShader("shader\\vertexNotexture.glsl", "shader\\lightFrag.glsl", &lightProgram);
+	addProgShader("shader\\vertex.glsl", "shader\\textureNoLight.glsl", &backgroundShader);
 
 
 	//------------------ TEXTURE OPTION ------------------//
 
-	unsigned int boxTexture;
-	unsigned int boxSpecular;
-	unsigned int boxEmissive;
 
-	unsigned int juptexture;
+	unsigned int planetTexture;
+	unsigned int background;
 
-	materials->diffuse_texname = removeEnter(materials->diffuse_texname);
-	createTexture(&juptexture, materials->diffuse_texname, TRUE);
+	//materials->diffuse_texname = removeEnter(materials->diffuse_texname);
+	createTexture(&planetTexture, "texture\\jupiter.png", TRUE);
+	createTexture(&background, "texture\\starmap.jpg", FALSE);
 
 	//because we use multiple texture set a number for each texture (cannot be the same)
 	glUseProgram(shaderProgram);
@@ -266,8 +266,6 @@ int main()
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//set multiple texture
-
 		//use shader program
 		glUseProgram(shaderProgram);
 
@@ -276,51 +274,29 @@ int main()
 		addFloat(shaderProgram, "time", time);
 
 		sendLightInfo(light, shaderProgram);
-		addFloat(shaderProgram, "material.shininess", 32.0f);
-
-		camera.deltaTime = time - camera.lastFrame;
-		camera.lastFrame = time;
-
-		//create matrix for move the cube, cam and lens setting
-		glm_vec3_add(camera.pos, camera.front, camera.target);
-		glm_lookat(camera.pos, camera.target, camera.upAxe, camera.view);
+		addFloat(shaderProgram, "material.shininess", 32.0f); 
+		calculeView(&camera, time);
 
 		mat4 projection = GLM_MAT4_IDENTITY_INIT;
-		//make the cam
-		glm_perspective(glm_rad(45.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.f, projection);
-		//send the matrix to the shader
+		glm_perspective(glm_rad(45.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.f, projection);
 		addMat4(shaderProgram, "view", camera.view);
 		addMat4(shaderProgram, "projection", projection);
 
 		//draw
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, juptexture);
+		createObject(planetTexture, shpereVAO, attrib.num_faces, shaderProgram, 1., 0. ,0. ,0.);
 
-		glBindVertexArray(jupVAO);
-		mat4 jupPos = GLM_MAT4_IDENTITY_INIT;
+		glUseProgram(backgroundShader);
+		addMat4(backgroundShader, "view", camera.view);
+		addMat4(backgroundShader, "projection", projection);
 
-		addMat4(shaderProgram, "transform", jupPos);
-
-		glDrawArrays(GL_TRIANGLES, 0, attrib.num_faces);
-
-
+		createObject(background, shpereVAO, attrib.num_faces, backgroundShader, 3000.,0.,0.,0.);
+		
 		glUseProgram(lightProgram);
-		glBindVertexArray(lightVAO);
-		mat4 lightPosRedu = GLM_MAT4_IDENTITY_INIT;
-
-		vec3 yup = { 0.,1.,0.0 };
-		glm_rotate_at(lightPosRedu, zero, glm_rad(0.1f), yup);
-		glm_vec3_rotate_m4(lightPosRedu, light.position, light.position, light.position);
-
-		glm_translate(lightPosRedu, light.position);
-		glm_scale(lightPosRedu, redu);
-
 		addMat4(lightProgram, "view", camera.view);
 		addMat4(lightProgram, "projection", projection);
-		addMat4(lightProgram, "transform", lightPosRedu);
 
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 36);
+		createLum(lightVAO, 36, lightProgram, light.position);
 
 		//check and call event
 		glfwSwapBuffers(window);
