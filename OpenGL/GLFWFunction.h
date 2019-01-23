@@ -13,5 +13,5 @@
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window, Camera * camera);
 void processMouse(GLFWwindow * window, Camera * camera);
-void processGUI(struct nk_context *ctx, struct nk_colorf * bg,Camera * camera);
+void processGUI(struct nk_context *ctx, struct nk_colorf * bg,Camera * camera,Light * light);
 void initGUI(struct nk_context **ctx, struct nk_image * img, GLFWwindow* window);

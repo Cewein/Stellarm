@@ -220,15 +220,18 @@ int main(void)
 
 	unsigned int jupiterTexture;
 	unsigned int marsTexture;
-	//unsigned int Texture;
+	unsigned int mercureTexture;
+	unsigned int venusTexture;
+	unsigned int earthTexture;
 	unsigned int background;
 
 	//materials->diffuse_texname = removeEnter(materials->diffuse_texname);
 	createTexture(&jupiterTexture, "texture\\jupiter.png", TRUE);
 	createTexture(&marsTexture, "texture\\mars.jpg", TRUE);
+	createTexture(&mercureTexture, "texture\\mercury.jpg", TRUE);
+	createTexture(&venusTexture, "texture\\venus.jpg", TRUE);
+	createTexture(&earthTexture, "texture\\earth.jpg", TRUE);
 	/*
-	createTexture(&Texture, "texture\\.png", TRUE);
-	createTexture(&Texture, "texture\\.png", TRUE);
 	createTexture(&Texture, "texture\\.png", TRUE);
 	createTexture(&Texture, "texture\\.png", TRUE);
 	createTexture(&Texture, "texture\\.png", TRUE);
@@ -272,8 +275,8 @@ int main(void)
 		.position = { 0.0f, 0.0f, 0.0f },
 		.watcher = { camera.pos[0],camera.pos[1], camera.pos[2] },
 
-		.constant = .01f,
-		.linear = .09f,
+		.constant = .1f,
+		.linear = .0009f,
 		.quadratic = 0.00032f
 
 	};
@@ -284,7 +287,7 @@ int main(void)
 		//input
 		processInput(window, &camera);
 		processMouse(window, &camera);
-		processGUI(ctx, &bg,&camera);
+		processGUI(ctx, &bg,&camera,&light);
 
 		glEnable(GL_DEPTH_TEST); //this allow the graphic pipeline to work
 
@@ -310,18 +313,12 @@ int main(void)
 
 		//draw
 
-		createObject(jupiterTexture, shpereVAO, attrib.num_faces, shaderProgram, 1., 0. ,0. ,-20.);
+		createObject(jupiterTexture, shpereVAO, attrib.num_faces, shaderProgram, 10., 0. ,0. ,-20.);
+		createObject(mercureTexture, shpereVAO, attrib.num_faces, shaderProgram, 0.383, 0.,0. , 57);
+		createObject(venusTexture, shpereVAO, attrib.num_faces, shaderProgram, 0.949, 0.,0. , 108);
+		createObject(earthTexture, shpereVAO, attrib.num_faces, shaderProgram, 1, 0.,0. , 149);
+		createObject(marsTexture, shpereVAO, attrib.num_faces, shaderProgram, 0.533, 0.,0. , 227);
 		
-		for (int i = -5; i < 5; i++)
-		{
-			for (int j = -5; j < 5; j++)
-			{
-				for (int k = -5; k < 5; k++)
-				{
-					createObject(marsTexture, shpereVAO, attrib.num_faces, shaderProgram, 0.048, j, cos(time + (float)k) + k, i);
-				}
-			}
-		}
 		
 
 		glUseProgram(backgroundShader);

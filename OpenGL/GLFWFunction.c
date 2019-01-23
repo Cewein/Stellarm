@@ -82,7 +82,7 @@ void processMouse(GLFWwindow * window, Camera * camera)
 	}
 }
 
-void processGUI(struct nk_context *ctx, struct nk_colorf * bg,Camera * camera)
+void processGUI(struct nk_context *ctx, struct nk_colorf * bg, Camera * camera, Light * light)
 {
 	nk_glfw3_new_frame();
 	if (nk_begin(ctx, "Param", nk_rect(5, 5, 200, 250), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
@@ -92,7 +92,28 @@ void processGUI(struct nk_context *ctx, struct nk_colorf * bg,Camera * camera)
 			nk_layout_row_push(ctx, 50);
 			nk_label(ctx, "Speed:", 110);
 			nk_layout_row_push(ctx, 110);
-			nk_slider_float(ctx, 0, &camera->speed, 500.0f, 0.1);
+			nk_slider_float(ctx, 0, &camera->speed, 50.0f, 0.1);
+		}
+		nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
+		{
+			nk_layout_row_push(ctx, 50);
+			nk_label(ctx, "Quadratic:", 110);
+			nk_layout_row_push(ctx, 110);
+			nk_slider_float(ctx, 0, &light->quadratic, 0.0005, 0.000001);
+		}
+		nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
+		{
+			nk_layout_row_push(ctx, 50);
+			nk_label(ctx, "Linear:", 110);
+			nk_layout_row_push(ctx, 110);
+			nk_slider_float(ctx, 0, &light->linear, 1.0f, 0.001);
+		}
+		nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
+		{
+			nk_layout_row_push(ctx, 50);
+			nk_label(ctx, "Constant:", 110);
+			nk_layout_row_push(ctx, 110);
+			nk_slider_float(ctx, 0, &light->constant, 2.0f, 0.001);
 		}
 	}
 	nk_end(ctx);
