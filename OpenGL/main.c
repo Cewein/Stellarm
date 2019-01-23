@@ -15,17 +15,24 @@
 #define SCR_WIDTH 1200
 #define SCR_HEIGHT 1000
 
-int main()
+#define MAX_VERTEX_BUFFER 512 * 1024
+#define MAX_ELEMENT_BUFFER 128 * 1024
+
+int main(void)
 {
+	struct nk_context *ctx = NULL;
+	struct nk_colorf bg;
+	struct nk_image img;
+
 	//FILE * logFile = NULL;
 
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	//start a pointer on the windows
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Stellarm", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Stellarm 1.0 beta release", NULL, NULL);
 	if (window == NULL)
 	{
 		printf("Failed to create GLFW Window\n");
@@ -40,6 +47,10 @@ int main()
 		printf("Failed to initilize GLAD");
 		return -1;
 	}
+
+	
+	initGUI(&ctx, &img, window);
+
 
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -207,11 +218,22 @@ int main()
 	//------------------ TEXTURE OPTION ------------------//
 
 
-	unsigned int planetTexture;
+	unsigned int jupiterTexture;
+	unsigned int marsTexture;
+	//unsigned int Texture;
 	unsigned int background;
 
 	//materials->diffuse_texname = removeEnter(materials->diffuse_texname);
-	createTexture(&planetTexture, "texture\\jupiter.png", TRUE);
+	createTexture(&jupiterTexture, "texture\\jupiter.png", TRUE);
+	createTexture(&marsTexture, "texture\\mars.jpg", TRUE);
+	/*
+	createTexture(&Texture, "texture\\.png", TRUE);
+	createTexture(&Texture, "texture\\.png", TRUE);
+	createTexture(&Texture, "texture\\.png", TRUE);
+	createTexture(&Texture, "texture\\.png", TRUE);
+	createTexture(&Texture, "texture\\.png", TRUE);
+	createTexture(&Texture, "texture\\.png", TRUE);
+	*/
 	createTexture(&background, "texture\\starmap.jpg", FALSE);
 
 	//because we use multiple texture set a number for each texture (cannot be the same)
@@ -239,16 +261,16 @@ int main()
 		.lastX = (float)SCR_HEIGHT / 2,
 		.lastY = (float)SCR_WIDTH / 2,
 		.lastFrame = 0.0f,
-		.deltaTime = 0.0f
+		.deltaTime = 0.0f,
+		.speed = 2.5f
 	};
 
 	Light light = {
 		.diffuse = { 0.5f, 0.5f, 0.5f },
 		.ambiant = { 0.2f, 0.2f, 0.2f },
 		.specular = { 1.f, 1.f, 1.f },
-		.direction = { -0.2f, -1.0f, -0.3f},
-		.position = { 0.0f, 0.0f, -20.0f },
-		.watcher = { camera.pos[0],camera.pos[2], camera.pos[2] },
+		.position = { 0.0f, 0.0f, 0.0f },
+		.watcher = { camera.pos[0],camera.pos[1], camera.pos[2] },
 
 		.constant = .01f,
 		.linear = .09f,
@@ -256,11 +278,15 @@ int main()
 
 	};
 
+	bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
 	while (!glfwWindowShouldClose(window))
 	{
 		//input
 		processInput(window, &camera);
 		processMouse(window, &camera);
+		processGUI(ctx, &bg,&camera);
+
+		glEnable(GL_DEPTH_TEST); //this allow the graphic pipeline to work
 
 		//rendering
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -284,13 +310,25 @@ int main()
 
 		//draw
 
-		createObject(planetTexture, shpereVAO, attrib.num_faces, shaderProgram, 1., 0. ,0. ,0.);
+		createObject(jupiterTexture, shpereVAO, attrib.num_faces, shaderProgram, 1., 0. ,0. ,-20.);
+		
+		for (int i = -5; i < 5; i++)
+		{
+			for (int j = -5; j < 5; j++)
+			{
+				for (int k = -5; k < 5; k++)
+				{
+					createObject(marsTexture, shpereVAO, attrib.num_faces, shaderProgram, 0.048, j, cos(time + (float)k) + k, i);
+				}
+			}
+		}
+		
 
 		glUseProgram(backgroundShader);
 		addMat4(backgroundShader, "view", camera.view);
 		addMat4(backgroundShader, "projection", projection);
 
-		createObject(background, shpereVAO, attrib.num_faces, backgroundShader, 3000.,0.,0.,0.);
+		createObject(background, shpereVAO, attrib.num_faces, backgroundShader, 3000.,0, 0, 0);
 		
 		glUseProgram(lightProgram);
 		addMat4(lightProgram, "view", camera.view);
@@ -299,6 +337,7 @@ int main()
 		createLum(lightVAO, 36, lightProgram, light.position);
 
 		//check and call event
+		nk_glfw3_render(NK_ANTI_ALIASING_OFF);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

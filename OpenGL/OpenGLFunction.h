@@ -13,6 +13,7 @@ typedef struct Cams {
 	//time for the cam
 	float deltaTime;
 	float lastFrame;
+	float speed;
 
 	//pos of the 2d cam
 	double lastX;
