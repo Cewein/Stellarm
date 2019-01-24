@@ -12,10 +12,8 @@
 #include "glTexture.h"
 #include "lightGL.h"
 
-#include "positionPlanet.h"
-
-#define SCR_WIDTH 1920
-#define SCR_HEIGHT 1080
+#define SCR_WIDTH 1200
+#define SCR_HEIGHT 1000
 
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
@@ -28,17 +26,13 @@ int main(void)
 
 	//FILE * logFile = NULL;
 
-	Planet * planet = malloc(sizeof(Planet) * 10);
-
-	getPlanetPosition(planet);
-
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	//start a pointer on the windows
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Stellarm 1.0 beta release", glfwGetPrimaryMonitor(), NULL);
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Stellarm 1.0 beta release", NULL, NULL);
 	if (window == NULL)
 	{
 		printf("Failed to create GLFW Window\n");
@@ -62,6 +56,51 @@ int main(void)
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 	//---------------------- SHAPES ----------------------//
+	//this is a cube
+	float cube[] = {
+		// positions          // normals           // texture coords
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+	};
 
 	/////////////////////// LOADING OBJ /////////////////////// 
 
@@ -100,16 +139,16 @@ int main(void)
 		cubeArray[i * 8 + 7] = attrib.texcoords[vt * 2 + 1];
 	}
 
-	unsigned int sphereVBO;
-	unsigned int sphereVAO;
+	unsigned int shpereVBO;
+	unsigned int shpereVAO;
 
 	{
-		glGenVertexArrays(1, &sphereVAO);
-		glGenBuffers(1, &sphereVBO);
+		glGenVertexArrays(1, &shpereVAO);
+		glGenBuffers(1, &shpereVBO);
 
-		glBindVertexArray(sphereVAO);
+		glBindVertexArray(shpereVAO);
 
-		glBindBuffer(GL_ARRAY_BUFFER, sphereVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, shpereVBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8 * attrib.num_faces, cubeArray, GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -121,6 +160,46 @@ int main(void)
 	}
 
 	///////////////////////////////////////////////////////////
+
+
+	//---------------------- BUFFER ----------------------//
+	//creating buffer
+	unsigned int VBO;
+	unsigned int cubeVAO;
+
+	{
+		//ALWAYS GEN BUFFER OR ARRAY BEFORE USING THEM//
+		glGenVertexArrays(1, &cubeVAO);
+		glGenBuffers(1, &VBO);
+
+		//bind the Vertex Array Object (VAO), next the Vertex Buffer (VBO) and last the Element Buffer/Vertex Attribute (EBO)
+		glBindVertexArray(cubeVAO);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
+
+		//box vertex attribute
+		//telling OpenGL how to use the vertices array
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+	}
+
+	//light buffer
+	unsigned int lightVAO;
+
+	{
+		glGenVertexArrays(1, &lightVAO);
+
+		glBindVertexArray(lightVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+	}
 
 	//enable the z buffer
 	glEnable(GL_DEPTH_TEST);
@@ -144,27 +223,20 @@ int main(void)
 	unsigned int mercureTexture;
 	unsigned int venusTexture;
 	unsigned int earthTexture;
-	unsigned int sunTexture;
 	unsigned int background;
-	unsigned int moonTexture;
-	unsigned int saturneTexture;
-	unsigned int uranusTexture;
-	unsigned int neptuneTexture;
 
-	unsigned int textureArr[10];
-
-	createTexture(&textureArr[0],"texture\\sun.jpg", TRUE);
-	createTexture(&textureArr[1],"texture\\earth.jpg", TRUE);
-	createTexture(&textureArr[2],"texture\\moon.jpg", TRUE);
-	createTexture(&textureArr[3],"texture\\venus.jpg", TRUE);
-	createTexture(&textureArr[4],"texture\\mercury.jpg", TRUE);
-	createTexture(&textureArr[5],"texture\\mars.jpg", TRUE);
-	createTexture(&textureArr[6],"texture\\jupiter.png", TRUE);
-	createTexture(&textureArr[7],"texture\\saturn.jpg", TRUE);
-	createTexture(&textureArr[8],"texture\\uranus.jpg", TRUE);
-	createTexture(&textureArr[9],"texture\\neptune.jpg", TRUE);
-	
-
+	//materials->diffuse_texname = removeEnter(materials->diffuse_texname);
+	createTexture(&jupiterTexture, "texture\\jupiter.png", TRUE);
+	createTexture(&marsTexture, "texture\\mars.jpg", TRUE);
+	createTexture(&mercureTexture, "texture\\mercury.jpg", TRUE);
+	createTexture(&venusTexture, "texture\\venus.jpg", TRUE);
+	createTexture(&earthTexture, "texture\\earth.jpg", TRUE);
+	/*
+	createTexture(&Texture, "texture\\.png", TRUE);
+	createTexture(&Texture, "texture\\.png", TRUE);
+	createTexture(&Texture, "texture\\.png", TRUE);
+	createTexture(&Texture, "texture\\.png", TRUE);
+	*/
 	createTexture(&background, "texture\\starmap.jpg", FALSE);
 
 	//because we use multiple texture set a number for each texture (cannot be the same)
@@ -214,6 +286,7 @@ int main(void)
 	{
 		//input
 		processInput(window, &camera);
+		processMouse(window, &camera);
 		processGUI(ctx, &bg,&camera,&light);
 
 		glEnable(GL_DEPTH_TEST); //this allow the graphic pipeline to work
@@ -234,28 +307,31 @@ int main(void)
 		calculeView(&camera, time);
 
 		mat4 projection = GLM_MAT4_IDENTITY_INIT;
-		glm_perspective(glm_rad(45.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.f, projection);
+		glm_perspective(glm_rad(45.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.f, projection);
 		addMat4(shaderProgram, "view", camera.view);
 		addMat4(shaderProgram, "projection", projection);
 
 		//draw
 
-		for (int i = 0; i < 10; i++)
-		{
-			createObject(textureArr[i], sphereVAO, attrib.num_faces, shaderProgram, 10., planet[i].x, planet[i].y, planet[i].z);
-		}
+		createObject(jupiterTexture, shpereVAO, attrib.num_faces, shaderProgram, 10., 0. ,0. ,-20.);
+		createObject(mercureTexture, shpereVAO, attrib.num_faces, shaderProgram, 0.383, 0.,0. , 57);
+		createObject(venusTexture, shpereVAO, attrib.num_faces, shaderProgram, 0.949, 0.,0. , 108);
+		createObject(earthTexture, shpereVAO, attrib.num_faces, shaderProgram, 1, 0.,0. , 149);
+		createObject(marsTexture, shpereVAO, attrib.num_faces, shaderProgram, 0.533, 0.,0. , 227);
 		
+		
+
 		glUseProgram(backgroundShader);
 		addMat4(backgroundShader, "view", camera.view);
 		addMat4(backgroundShader, "projection", projection);
 
-		createObject(background, sphereVAO, attrib.num_faces, backgroundShader, 30000.,0, 0, 0);
+		createObject(background, shpereVAO, attrib.num_faces, backgroundShader, 3000.,0, 0, 0);
 		
 		glUseProgram(lightProgram);
 		addMat4(lightProgram, "view", camera.view);
 		addMat4(lightProgram, "projection", projection);
 
-		createLum(sphereVAO, attrib.num_faces, lightProgram, light.position);
+		createLum(lightVAO, 36, lightProgram, light.position);
 
 		//check and call event
 		nk_glfw3_render(NK_ANTI_ALIASING_OFF);
@@ -269,9 +345,9 @@ int main(void)
 
 	free(cubeArray);
 
-	glDeleteVertexArrays(1, &sphereVAO);
+	glDeleteVertexArrays(1, &cubeVAO);
 	glDeleteVertexArrays(1, &lightProgram);
-	glDeleteBuffers(1, &sphereVBO);
+	glDeleteBuffers(1, &VBO);
 
 	glfwTerminate();
 

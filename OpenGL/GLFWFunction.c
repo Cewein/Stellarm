@@ -21,7 +21,6 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 void processInput(GLFWwindow* window, Camera * camera)
 {
 	float camSpeed = camera->speed * camera->deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) camSpeed *= 10;
 	vec3 tmp = GLM_VEC3_ZERO_INIT;
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, 1);
@@ -47,12 +46,7 @@ void processInput(GLFWwindow* window, Camera * camera)
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	else
-	{
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		processMouse(window, camera);
-	}
-
+	else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void processMouse(GLFWwindow * window, Camera * camera)
@@ -88,6 +82,43 @@ void processMouse(GLFWwindow * window, Camera * camera)
 	}
 }
 
+void processGUI(struct nk_context *ctx, struct nk_colorf * bg, Camera * camera, Light * light)
+{
+	nk_glfw3_new_frame();
+	if (nk_begin(ctx, "Param", nk_rect(5, 5, 200, 250), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
+	{
+		nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
+		{
+			nk_layout_row_push(ctx, 50);
+			nk_label(ctx, "Speed:", 110);
+			nk_layout_row_push(ctx, 110);
+			nk_slider_float(ctx, 0, &camera->speed, 50.0f, 0.1);
+		}
+		nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
+		{
+			nk_layout_row_push(ctx, 50);
+			nk_label(ctx, "Quadratic:", 110);
+			nk_layout_row_push(ctx, 110);
+			nk_slider_float(ctx, 0, &light->quadratic, 0.0005, 0.000001);
+		}
+		nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
+		{
+			nk_layout_row_push(ctx, 50);
+			nk_label(ctx, "Linear:", 110);
+			nk_layout_row_push(ctx, 110);
+			nk_slider_float(ctx, 0, &light->linear, 1.0f, 0.001);
+		}
+		nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
+		{
+			nk_layout_row_push(ctx, 50);
+			nk_label(ctx, "Constant:", 110);
+			nk_layout_row_push(ctx, 110);
+			nk_slider_float(ctx, 0, &light->constant, 2.0f, 0.001);
+		}
+	}
+	nk_end(ctx);
+}
+
 void initGUI(struct nk_context **ctx, struct nk_image * img, GLFWwindow* window)
 {
 	/////////// setting up Nuklear ///////////
@@ -108,46 +139,3 @@ void initGUI(struct nk_context **ctx, struct nk_image * img, GLFWwindow* window)
 	}
 }
 
-void processGUI(struct nk_context *ctx, struct nk_colorf * bg, Camera * camera, Light * light)
-{
-	nk_glfw3_new_frame();
-	if (nk_begin(ctx, "Param", nk_rect(5, 5, 250, 300), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
-	{
-		float ratio[] = { 220, 150 };
-		nk_layout_row(ctx, NK_STATIC, 30, 1, ratio);
-		nk_label(ctx, "Speed option", NK_TEXT_ALIGN_CENTERED);
-		nk_property_float(ctx, "Speed:", 0., &camera->speed, 50., 0.01, 0.1);
-		nk_label(ctx, "Light option", NK_TEXT_ALIGN_CENTERED);
-		nk_property_float(ctx, "constant:", -1., &light->constant, 2.0, 0.001, 0.001);
-		nk_labelf(ctx, NK_TEXT_ALIGN_CENTERED, "value: %f", light->constant);
-		nk_property_float(ctx, "linear:", -1., &light->linear, 2.0, 0.00001, 0.00001);
-		nk_labelf(ctx, NK_TEXT_ALIGN_CENTERED, "value: %f", light->linear);
-		nk_property_float(ctx, "quadratic:", -1., &light->quadratic, 2.0, 0.000001, 0.000001);
-		nk_labelf(ctx, NK_TEXT_ALIGN_CENTERED, "value: %f", light->quadratic);
-	}
-	nk_end(ctx);
-
-	if (nk_begin(ctx, "Time", nk_rect(500, 5, 250, 300), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
-	{
-		time_t curtime;
-		struct tm * timeStr;
-		time(&curtime);
-		timeStr = gmtime(&curtime);
-		float ratio[] = { 220, 150 };
-		nk_layout_row(ctx, NK_STATIC, 30, 1, ratio);
-		nk_label(ctx, "Select date", NK_TEXT_ALIGN_CENTERED);
-		int year = timeStr->tm_year + 1900;
-		nk_property_int(ctx, "Year:", 1900, &year, INFINITE, 1, 1);
-		timeStr->tm_year = year - 1900;
-		int month = timeStr->tm_mon + 1;
-		nk_property_int(ctx, "Month:", 1, &month, 12, 1, 1);
-		timeStr->tm_mon = month - 1;
-		nk_property_int(ctx, "Day:", 1, &timeStr->tm_mday, 31, 1, 1);
-		nk_property_int(ctx, "Hour:", 0, &timeStr->tm_hour, 23, 1, 1);
-		nk_property_int(ctx, "Minute:", 0, &timeStr->tm_min, 59, 1, 1);
-		nk_property_int(ctx, "Second:", 0, &timeStr->tm_sec, 59, 1, 1);
-
-		if (nk_button_label(ctx, "Done"));
-	}
-	nk_end(ctx);
-}	
