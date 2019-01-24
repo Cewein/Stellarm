@@ -65,5 +65,5 @@ void createLum(unsigned int shape, int faceNum, unsigned int shaderProgram, vec3
 	mat4 lightTrans = GLM_MAT4_IDENTITY_INIT;
 	glm_translate(lightTrans, lightPos);
 	addMat4(shaderProgram, "transform", lightTrans);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 36);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, faceNum);
 }
