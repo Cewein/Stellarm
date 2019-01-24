@@ -4,6 +4,7 @@
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
 #include <cglm/cglm.h>
+#include <time.h>
 
 #include "nuklear.h"
 #include "nuklear_glfw_gl4.h"
