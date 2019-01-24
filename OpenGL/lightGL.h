@@ -6,7 +6,7 @@
 /*!
 This create a light object that can be move everywhere
 */
-typedef struct {
+typedef struct Lights{
 	vec3 diffuse;
 	vec3 ambiant;
 	vec3 specular;

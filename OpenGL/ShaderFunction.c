@@ -100,3 +100,10 @@ void const addMat4(unsigned int progId, char * name, mat4 value)
 	glUniformMatrix4fv(glGetUniformLocation(progId, name), 1, GL_FALSE, value[0]);
 }
 
+float getAddTime(unsigned int progId)
+{
+	float time = glfwGetTime();
+	addFloat(progId, "time", time);
+	return time;
+}
+

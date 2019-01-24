@@ -4,6 +4,8 @@
 #include <string.h>
 #include <cglm/cglm.h>
 
+#include "lightGL.h"
+
 /*!
 this struct is a OpenGL cam, it need everything for a camera in openGL in C
 */
@@ -11,6 +13,7 @@ typedef struct Cams {
 	//time for the cam
 	float deltaTime;
 	float lastFrame;
+	float speed;
 
 	//pos of the 2d cam
 	double lastX;
@@ -31,5 +34,17 @@ typedef struct Cams {
 } Camera;
 
 void shaderCompilStat(unsigned int shader, char * shaderName);
-
 void programCompliStat(unsigned int program, char * programName);
+void calculeView(Camera * camera, float time);
+
+/*!
+* @param texture Texture of the object if NULL no texture apply
+* @param shape VAO of the object
+* @param faceNum number of shape. must be the exacte number
+* @param shaderProgram shader ID, see shader creation for more info
+*/
+void createObject(unsigned int texture, unsigned int shape, int faceNum, unsigned int shaderProgram, float size, float x, float y, float z);
+
+void createLum(unsigned int shape, int faceNum, unsigned int shaderProgram, vec3 lightPos);
+
+
