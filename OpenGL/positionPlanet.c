@@ -538,12 +538,12 @@ int degresToPwm2(double degrees) {
 
 void position(Planet *astre) {
 	double x = (astre->distance) * cos(DEG2RAD(astre->longitude));
-	double y = sqrt((astre->distance) * (astre->distance) - x * x);
-	double z = (astre->latitude) * COEFF;
+	double y = (astre->latitude);
+	double z = sqrt((astre->distance) * (astre->distance) - x * x);
 	x = x * COEFF;
-	y = y * COEFF;
+	z = z * COEFF;
 	if (astre->longitude > 180) {
-		y = -y;
+		z = -z;
 	}
 	astre->x = x;
 	astre->y = y;
