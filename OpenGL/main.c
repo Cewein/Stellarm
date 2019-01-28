@@ -24,7 +24,6 @@ int main(void)
 {
 	struct nk_context *ctx = NULL;
 	struct nk_colorf bg;
-	struct nk_image img;
 
 	FILE * logFile = NULL;
 
@@ -55,7 +54,7 @@ int main(void)
 	}
 
 	
-	initGUI(&ctx, &img, window);
+	initGUI(&ctx, window);
 
 
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
@@ -214,7 +213,7 @@ int main(void)
 	{
 		//input
 		processInput(window, &camera);
-		processGUI(ctx, &bg,&camera,&light);
+		processGUI(ctx, &camera, &light);
 
 		glEnable(GL_DEPTH_TEST); //this allow the graphic pipeline to work
 
@@ -276,7 +275,7 @@ int main(void)
 		createLum(sphereVAO, attrib.num_faces, lightProgram, light.position);*/
 
 		//check and call event
-		nk_glfw3_render(NK_ANTI_ALIASING_OFF);
+		nk_glfw3_render(NK_ANTI_ALIASING_OFF, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -290,7 +289,7 @@ int main(void)
 	glDeleteVertexArrays(1, &sphereVAO);
 	glDeleteVertexArrays(1, &lightProgram);
 	glDeleteBuffers(1, &sphereVBO);
-
+	nk_glfw3_shutdown();
 	glfwTerminate();
 
 	return 0;

@@ -1,6 +1,3 @@
-#define MAX_VERTEX_BUFFER 512 * 1024
-#define MAX_ELEMENT_BUFFER 128 * 1024
-
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
 #define NK_INCLUDE_STANDARD_VARARGS
@@ -8,9 +5,9 @@
 #define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
 #define NK_INCLUDE_FONT_BAKING
 #define NK_INCLUDE_DEFAULT_FONT
-#define NK_GLFW_GL4_IMPLEMENTATION
-#define NK_KEYSTATE_BASED_INPUT
 #define NK_IMPLEMENTATION
+#define NK_GLFW_GL3_IMPLEMENTATION
+#define NK_KEYSTATE_BASED_INPUT
 #include "GLFWFunction.h"
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
@@ -21,6 +18,8 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 void processInput(GLFWwindow* window, Camera * camera)
 {
 	float camSpeed = camera->speed * camera->deltaTime;
+	int inMenu = 0;
+
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) camSpeed *= 10;
 	vec3 tmp = GLM_VEC3_ZERO_INIT;
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -49,8 +48,9 @@ void processInput(GLFWwindow* window, Camera * camera)
 	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) 
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		inMenu = ++inMenu % 2;
 	}
-	else
+	else if (!inMenu)
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		processMouse(window, camera);
@@ -92,27 +92,18 @@ void processMouse(GLFWwindow * window, Camera * camera)
 	}
 }
 
-void initGUI(struct nk_context **ctx, struct nk_image * img, GLFWwindow* window)
+void initGUI(struct nk_context **ctx, GLFWwindow* window)
 {
 	/////////// setting up Nuklear ///////////
-	*ctx = nk_glfw3_init(window, NK_GLFW3_INSTALL_CALLBACKS, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+	*ctx = nk_glfw3_init(window, NK_GLFW3_INSTALL_CALLBACKS);
 	{
 		struct nk_font_atlas *atlas;
 		nk_glfw3_font_stash_begin(&atlas);
 		nk_glfw3_font_stash_end();
 	}
-
-	{
-		int tex_index = 0;
-		enum { tex_width = 256, tex_height = 256 };
-		char pixels[tex_width * tex_height * 4];
-		memset(pixels, 128, sizeof(pixels));
-		tex_index = nk_glfw3_create_texture(pixels, tex_width, tex_height);
-		*img = nk_image_id(tex_index);
-	}
 }
 
-void processGUI(struct nk_context *ctx, struct nk_colorf * bg, Camera * camera, Light * light)
+void processGUI(struct nk_context *ctx, Camera * camera, Light * light)
 {
 	nk_glfw3_new_frame();
 	if (nk_begin(ctx, "Param", nk_rect(5, 5, 250, 300), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
