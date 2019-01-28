@@ -12,10 +12,10 @@
 #include "glTexture.h"
 #include "lightGL.h"
 
-#include "positionPlanet.h"
+#include "astro.h"
 
-#define SCR_WIDTH 1920
-#define SCR_HEIGHT 1080
+#define SCR_WIDTH 1200
+#define SCR_HEIGHT 1000
 
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
@@ -26,7 +26,7 @@ int main(void)
 	struct nk_colorf bg;
 	struct nk_image img;
 
-	//FILE * logFile = NULL;
+	FILE * logFile = NULL;
 
 	Planet * planet = malloc(sizeof(Planet) * 10);
 
@@ -38,7 +38,7 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	//start a pointer on the windows
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Stellarm 1.0 beta release", glfwGetPrimaryMonitor(), NULL);
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Stellarm 1.0 beta release", NULL, NULL);
 	if (window == NULL)
 	{
 		printf("Failed to create GLFW Window\n");
@@ -156,15 +156,16 @@ int main(void)
 	createTexture(&textureArr[0],"texture\\sun.jpg", TRUE);
 	createTexture(&textureArr[1],"texture\\earth.jpg", TRUE);
 	createTexture(&textureArr[2],"texture\\moon.jpg", TRUE);
-	createTexture(&textureArr[3],"texture\\venus.jpg", TRUE);
-	createTexture(&textureArr[4],"texture\\mercury.jpg", TRUE);
+	createTexture(&textureArr[3],"texture\\mercury.jpg", TRUE);
+	createTexture(&textureArr[4],"texture\\venus.jpg", TRUE);
 	createTexture(&textureArr[5],"texture\\mars.jpg", TRUE);
 	createTexture(&textureArr[6],"texture\\jupiter.png", TRUE);
 	createTexture(&textureArr[7],"texture\\saturn.jpg", TRUE);
 	createTexture(&textureArr[8],"texture\\uranus.jpg", TRUE);
 	createTexture(&textureArr[9],"texture\\neptune.jpg", TRUE);
 	
-
+	createTexture(&venusTexture, "texture\\venus_atmosphere.jpg", TRUE);
+	
 	createTexture(&background, "texture\\starmap.jpg", FALSE);
 
 	//because we use multiple texture set a number for each texture (cannot be the same)
@@ -173,7 +174,6 @@ int main(void)
 	addInt(shaderProgram, "material.diffuse", 0);
 	addInt(shaderProgram, "material.specular", 1);
 
-	//glUseProgram(jupProg);
 	//------------------- RENDER  LOOP -------------------//
 	
 
@@ -183,7 +183,7 @@ int main(void)
 
 	Camera camera = {
 		.view = GLM_MAT4_IDENTITY_INIT,
-		.pos = { 0.f,2.f,3.f },
+		.pos = { 0.f,5.f,10.f },
 		.target = { 0.f, 0.f, 0.f },
 		.upAxe = { 0.0f, 1.0f, 0.0f },
 		.front = { 0.0f, 0.0f, -1.0 },
@@ -203,13 +203,13 @@ int main(void)
 		.position = { 0.0f, 0.0f, 0.0f },
 		.watcher = { camera.pos[0],camera.pos[1], camera.pos[2] },
 
-		.constant = .1f,
-		.linear = .0009f,
-		.quadratic = 0.00032f
+		.constant = 1.f,
+		.linear = .00014f,
+		.quadratic = .0000007f
 
 	};
 
-	bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
+	/*bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;*/
 	while (!glfwWindowShouldClose(window))
 	{
 		//input
@@ -242,7 +242,25 @@ int main(void)
 
 		for (int i = 0; i < 10; i++)
 		{
-			createObject(textureArr[i], sphereVAO, attrib.num_faces, shaderProgram, 10., planet[i].x, planet[i].y, planet[i].z);
+			if (!strcmp(planet[i].name, "Lune"))
+			{
+				createObject(textureArr[i], sphereVAO, attrib.num_faces, shaderProgram, 2.5, planet[i].x * 100 + planet[i-1].x, planet[i].y * 100 + planet[i-1].y, planet[i].z * 100 + planet[i-1 ].z);
+			}
+			else if (!strcmp(planet[i].name, "Venus"))
+			{
+				createObject(textureArr[i], sphereVAO, attrib.num_faces, shaderProgram, 10., planet[i].x, planet[i].y, planet[i].z);
+				createObject(venusTexture, sphereVAO, attrib.num_faces, shaderProgram, 12.2, planet[i].x, planet[i].y, planet[i].z);
+			}
+			else if (!strcmp(planet[i].name, "Soleil"))
+			{
+				glUseProgram(backgroundShader);
+				addMat4(backgroundShader, "view", camera.view);
+				addMat4(backgroundShader, "projection", projection);
+
+				createObject(textureArr[i], sphereVAO, attrib.num_faces, backgroundShader, 10., 0, 0, 0);
+				glUseProgram(shaderProgram);
+			}
+			else createObject(textureArr[i], sphereVAO, attrib.num_faces, shaderProgram, 10., planet[i].x, planet[i].y, planet[i].z);
 		}
 		
 		glUseProgram(backgroundShader);
@@ -251,11 +269,11 @@ int main(void)
 
 		createObject(background, sphereVAO, attrib.num_faces, backgroundShader, 30000.,0, 0, 0);
 		
-		glUseProgram(lightProgram);
+		/*glUseProgram(lightProgram);
 		addMat4(lightProgram, "view", camera.view);
 		addMat4(lightProgram, "projection", projection);
 
-		createLum(sphereVAO, attrib.num_faces, lightProgram, light.position);
+		createLum(sphereVAO, attrib.num_faces, lightProgram, light.position);*/
 
 		//check and call event
 		nk_glfw3_render(NK_ANTI_ALIASING_OFF);

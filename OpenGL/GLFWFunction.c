@@ -46,12 +46,16 @@ void processInput(GLFWwindow* window, Camera * camera)
 		glm_vec3_muladds(tmp, camSpeed, camera->pos);
 	}
 
-	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) 
+	{
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
 	else
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		processMouse(window, camera);
 	}
+
 
 }
 
