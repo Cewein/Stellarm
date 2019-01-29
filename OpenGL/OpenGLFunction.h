@@ -4,6 +4,7 @@
 #include <string.h>
 #include <cglm/cglm.h>
 
+#include "tinyobj_loader_c.h"
 #include "lightGL.h"
 
 /*!
@@ -46,5 +47,5 @@ void calculeView(Camera * camera, float time);
 void createObject(unsigned int texture, unsigned int shape, int faceNum, unsigned int shaderProgram, float size, float x, float y, float z);
 
 void createLum(unsigned int shape, int faceNum, unsigned int shaderProgram, vec3 lightPos);
-
-
+float * loadObj(char * file, int * nbOfFaces);
+void glBindObj(float * objArray, int objNbOfFaces, unsigned int VBO, unsigned int VAO);

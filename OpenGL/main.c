@@ -3,9 +3,6 @@
 #include <stdio.h>
 #include <cglm/cglm.h>
 
-#define TINYOBJ_LOADER_C_IMPLEMENTATION
-#include "tinyobj_loader_c.h"
-
 #include "GLFWFunction.h"
 #include "OpenGLFunction.h"
 #include "ShaderFunction.h"
@@ -28,7 +25,6 @@ int main(void)
 	FILE * logFile = NULL;
 
 	Planet * planet = malloc(sizeof(Planet) * 10);
-
 	getPlanetPosition(planet);
 
 	glfwInit();
@@ -62,64 +58,11 @@ int main(void)
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 	//---------------------- SHAPES ----------------------//
 
-	/////////////////////// LOADING OBJ /////////////////////// 
-
-	tinyobj_attrib_t attrib;
-	tinyobj_shape_t * shapes = NULL;
-	int num_shapes;
-	tinyobj_material_t * materials = NULL;
-	int num_materials;
-
-	int data_len = 0;
-
-	FILE * objFile = NULL;
-	objFile = fopen("JUPITER.obj", "rb");
-
-	data_len = fsize(objFile);
-	char * data = freadInArray(objFile);
-	printf("filesize : %d\n", (int)data_len);
-	unsigned int flags = TINYOBJ_FLAG_TRIANGULATE;
-	int ret = tinyobj_parse_obj(&attrib, &shapes, &num_shapes, &materials, &num_materials, data, data_len, flags);
-
-	float * cubeArray = malloc(sizeof(float) * 8 * attrib.num_faces);
-
-	for (int i = 0; i < attrib.num_faces; i++)
-	{
-		int v = attrib.faces[i].v_idx;
-		int vt = attrib.faces[i].vt_idx;
-		int vn = attrib.faces[i].vn_idx;
-
-		cubeArray[i * 8] = attrib.vertices[v * 3 + 0];
-		cubeArray[i * 8 + 1] = attrib.vertices[v * 3 + 1];
-		cubeArray[i * 8 + 2] = attrib.vertices[v * 3 + 2];
-		cubeArray[i * 8 + 3] = attrib.normals[vn * 3 + 0];
-		cubeArray[i * 8 + 4] = attrib.normals[vn * 3 + 1];
-		cubeArray[i * 8 + 5] = attrib.normals[vn * 3 + 2];
-		cubeArray[i * 8 + 6] = attrib.texcoords[vt * 2 + 0];
-		cubeArray[i * 8 + 7] = attrib.texcoords[vt * 2 + 1];
-	}
-
 	unsigned int sphereVBO;
 	unsigned int sphereVAO;
-
-	{
-		glGenVertexArrays(1, &sphereVAO);
-		glGenBuffers(1, &sphereVBO);
-
-		glBindVertexArray(sphereVAO);
-
-		glBindBuffer(GL_ARRAY_BUFFER, sphereVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8 * attrib.num_faces, cubeArray, GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-		glEnableVertexAttribArray(2);
-	}
-
-	///////////////////////////////////////////////////////////
+	int objNbOfFaces;
+	float * objArray = loadObj("JUPITER.obj", &objNbOfFaces);
+	glBindObj(objArray, objNbOfFaces, &sphereVBO, &sphereVAO);
 
 	//enable the z buffer
 	glEnable(GL_DEPTH_TEST);
@@ -164,7 +107,6 @@ int main(void)
 	createTexture(&textureArr[9],"texture\\neptune.jpg", TRUE);
 	
 	createTexture(&venusTexture, "texture\\venus_atmosphere.jpg", TRUE);
-	
 	createTexture(&background, "texture\\starmap.jpg", FALSE);
 
 	//because we use multiple texture set a number for each texture (cannot be the same)
@@ -197,7 +139,7 @@ int main(void)
 
 	Light light = {
 		.diffuse = { 0.5f, 0.5f, 0.5f },
-		.ambiant = { 0.2f, 0.2f, 0.2f },
+		.ambiant = { 0.02f, 0.02f, 0.02f },
 		.specular = { 1.f, 1.f, 1.f },
 		.position = { 0.0f, 0.0f, 0.0f },
 		.watcher = { camera.pos[0],camera.pos[1], camera.pos[2] },
@@ -243,12 +185,12 @@ int main(void)
 		{
 			if (!strcmp(planet[i].name, "Lune"))
 			{
-				createObject(textureArr[i], sphereVAO, attrib.num_faces, shaderProgram, 2.5, planet[i].x * 100 + planet[i-1].x, planet[i].y * 100 + planet[i-1].y, planet[i].z * 100 + planet[i-1 ].z);
+				createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, 2.5, planet[i].x * 100 + planet[i-1].x, planet[i].y * 100 + planet[i-1].y, planet[i].z * 100 + planet[i-1 ].z);
 			}
 			else if (!strcmp(planet[i].name, "Venus"))
 			{
-				createObject(textureArr[i], sphereVAO, attrib.num_faces, shaderProgram, 10., planet[i].x, planet[i].y, planet[i].z);
-				createObject(venusTexture, sphereVAO, attrib.num_faces, shaderProgram, 12.2, planet[i].x, planet[i].y, planet[i].z);
+				createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, 10., planet[i].x, planet[i].y, planet[i].z);
+				createObject(venusTexture, sphereVAO, objNbOfFaces, shaderProgram, 12.2, planet[i].x, planet[i].y, planet[i].z);
 			}
 			else if (!strcmp(planet[i].name, "Soleil"))
 			{
@@ -256,23 +198,17 @@ int main(void)
 				addMat4(backgroundShader, "view", camera.view);
 				addMat4(backgroundShader, "projection", projection);
 
-				createObject(textureArr[i], sphereVAO, attrib.num_faces, backgroundShader, 10., 0, 0, 0);
+				createObject(textureArr[i], sphereVAO, objNbOfFaces, backgroundShader, 10., 0, 0, 0);
 				glUseProgram(shaderProgram);
 			}
-			else createObject(textureArr[i], sphereVAO, attrib.num_faces, shaderProgram, 10., planet[i].x, planet[i].y, planet[i].z);
+			else createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, 10., planet[i].x, planet[i].y, planet[i].z);
 		}
 		
 		glUseProgram(backgroundShader);
 		addMat4(backgroundShader, "view", camera.view);
 		addMat4(backgroundShader, "projection", projection);
 
-		createObject(background, sphereVAO, attrib.num_faces, backgroundShader, 30000.,0, 0, 0);
-		
-		/*glUseProgram(lightProgram);
-		addMat4(lightProgram, "view", camera.view);
-		addMat4(lightProgram, "projection", projection);
-
-		createLum(sphereVAO, attrib.num_faces, lightProgram, light.position);*/
+		createObject(background, sphereVAO, objNbOfFaces, backgroundShader, 30000.,0, 0, 0);
 
 		//check and call event
 		nk_glfw3_render(NK_ANTI_ALIASING_OFF, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
@@ -280,11 +216,7 @@ int main(void)
 		glfwPollEvents();
 	}
 
-	tinyobj_attrib_free(&attrib);
-	tinyobj_shapes_free(shapes, num_shapes);
-	tinyobj_materials_free(materials, num_materials);
-
-	free(cubeArray);
+	free(objArray);
 
 	glDeleteVertexArrays(1, &sphereVAO);
 	glDeleteVertexArrays(1, &lightProgram);
