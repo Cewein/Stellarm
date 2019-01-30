@@ -23,6 +23,7 @@ typedef struct Cams {
 	//angle of the cam
 	float yaw; 
 	float pitch;
+	float FOV;
 
 	mat4 view; //this is the view of the window
 

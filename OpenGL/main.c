@@ -11,8 +11,8 @@
 
 #include "astro.h"
 
-#define SCR_WIDTH 1200
-#define SCR_HEIGHT 1000
+#define SCR_WIDTH 1920
+#define SCR_HEIGHT 1080
 
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
@@ -22,39 +22,17 @@ int main(void)
 	struct nk_context *ctx = NULL;
 	struct nk_colorf bg;
 
-	FILE * logFile = NULL;
+	//FILE * logFile = NULL;
 
 	Planet * planet = malloc(sizeof(Planet) * 10);
 	getPlanetPosition(planet);
 
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
 	//start a pointer on the windows
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Stellarm 1.0 beta release", NULL, NULL);
-	if (window == NULL)
-	{
-		printf("Failed to create GLFW Window\n");
-		glfwTerminate();
-		return -1;
-	}
-
-	//add OpenGL to the window
-	glfwMakeContextCurrent(window);
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		printf("Failed to initilize GLAD");
-		return -1;
-	}
-
-	
+	GLFWwindow * window = initWindow("Stellarm pre-release 1.0");
 	initGUI(&ctx, window);
 
 
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 	//---------------------- SHAPES ----------------------//
 
@@ -63,6 +41,12 @@ int main(void)
 	int objNbOfFaces;
 	float * objArray = loadObj("JUPITER.obj", &objNbOfFaces);
 	glBindObj(objArray, objNbOfFaces, &sphereVBO, &sphereVAO);
+
+	unsigned int flippedVBO;
+	unsigned int flippedVAO;
+	int flippedFaces;
+	float * flippedArray = loadObj("flippedSphere.obj", &flippedFaces);
+	glBindObj(flippedArray, flippedFaces, &flippedVBO, &flippedVAO);
 
 	//enable the z buffer
 	glEnable(GL_DEPTH_TEST);
@@ -130,6 +114,7 @@ int main(void)
 		.front = { 0.0f, 0.0f, -1.0 },
 		.yaw = -90.f,
 		.pitch = -45.f,
+		.FOV = 45.f,
 		.lastX = (float)SCR_HEIGHT / 2,
 		.lastY = (float)SCR_WIDTH / 2,
 		.lastFrame = 0.0f,
@@ -145,8 +130,8 @@ int main(void)
 		.watcher = { camera.pos[0],camera.pos[1], camera.pos[2] },
 
 		.constant = 1.f,
-		.linear = .00014f,
-		.quadratic = .0000007f
+		.linear = .000004f,
+		.quadratic = .000000000f
 
 	};
 
@@ -175,7 +160,7 @@ int main(void)
 		calculeView(&camera, time);
 
 		mat4 projection = GLM_MAT4_IDENTITY_INIT;
-		glm_perspective(glm_rad(45.f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.f, projection);
+		glm_perspective(glm_rad(camera.FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.f, projection);
 		addMat4(shaderProgram, "view", camera.view);
 		addMat4(shaderProgram, "projection", projection);
 
@@ -185,12 +170,12 @@ int main(void)
 		{
 			if (!strcmp(planet[i].name, "Lune"))
 			{
-				createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, 2.5, planet[i].x * 100 + planet[i-1].x, planet[i].y * 100 + planet[i-1].y, planet[i].z * 100 + planet[i-1 ].z);
+				createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, getSize(i), planet[i].x * 100 + planet[i-1].x, planet[i].y * 100 + planet[i-1].y, planet[i].z * 100 + planet[i-1 ].z);
 			}
 			else if (!strcmp(planet[i].name, "Venus"))
 			{
-				createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, 10., planet[i].x, planet[i].y, planet[i].z);
-				createObject(venusTexture, sphereVAO, objNbOfFaces, shaderProgram, 12.2, planet[i].x, planet[i].y, planet[i].z);
+				createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, getSize(i), planet[i].x, planet[i].y, planet[i].z);
+				createObject(venusTexture, flippedVAO, objNbOfFaces, shaderProgram, 1.2, planet[i].x, planet[i].y, planet[i].z);
 			}
 			else if (!strcmp(planet[i].name, "Soleil"))
 			{
@@ -198,10 +183,10 @@ int main(void)
 				addMat4(backgroundShader, "view", camera.view);
 				addMat4(backgroundShader, "projection", projection);
 
-				createObject(textureArr[i], sphereVAO, objNbOfFaces, backgroundShader, 10., 0, 0, 0);
+				createObject(textureArr[i], sphereVAO, objNbOfFaces, backgroundShader, getSize(i)/4, 0, 0, 0);
 				glUseProgram(shaderProgram);
 			}
-			else createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, 10., planet[i].x, planet[i].y, planet[i].z);
+			else createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, getSize(i), planet[i].x, planet[i].y, planet[i].z);
 		}
 		
 		glUseProgram(backgroundShader);

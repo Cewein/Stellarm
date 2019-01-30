@@ -32,3 +32,5 @@ void getPlanetPosition(Planet * planets);
 void degresToPwm(Servo *servo);
 void degresToPwm2(Servo *servo);
 int sizeForString(int value);
+
+double getSize(int x);

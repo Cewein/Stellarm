@@ -345,6 +345,21 @@ int sizeForString(int value) {
 	}
 }
 
+double getSize(int x)
+{
+	double a = -2.072960867 * pow(10, -3) * pow(x, 9);
+	double b = 8.34548489 * pow(10, -2) * pow(x, 8);
+	double c = -1.413928628 * pow(x, 7);
+	double d = 13.13480583 * pow(x, 6);
+	double e = -73.10750792 * pow(x, 5);
+	double f = 250.3807676 * pow(x, 4);
+	double g = -521.721571 * pow(x, 3);
+	double h = 630.0761532 * pow(x, 2);
+	double i = -396.430878 * x;
+	double j = 99.99883564;
+	return a+b+c+d+e+f+g+h+i+j;
+}
+
 void getPlanetPosition(Planet * planets)
 {
 	time_t rawtime;

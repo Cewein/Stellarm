@@ -44,6 +44,9 @@ void processInput(GLFWwindow* window, Camera * camera)
 		glm_normalize(tmp);
 		glm_vec3_muladds(tmp, camSpeed, camera->pos);
 	}
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		camera->FOV = 1;
+	else camera->FOV = 45;
 
 	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) 
 	{
@@ -103,6 +106,32 @@ void initGUI(struct nk_context **ctx, GLFWwindow* window)
 	}
 }
 
+GLFWwindow * initWindow(char * winName)
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	GLFWwindow * window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, winName, glfwGetPrimaryMonitor(), NULL);
+	if (window == NULL)
+	{
+		printf("Failed to create GLFW Window\n");
+		glfwTerminate();
+		return -1;
+	}
+
+	//add OpenGL to the window
+	glfwMakeContextCurrent(window);
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		printf("Failed to initilize GLAD");
+		return -1;
+	}
+
+	return window;
+}
+
 void processGUI(struct nk_context *ctx, Camera * camera, Light * light)
 {
 	nk_glfw3_new_frame();
@@ -112,9 +141,9 @@ void processGUI(struct nk_context *ctx, Camera * camera, Light * light)
 		nk_layout_row(ctx, NK_STATIC, 30, 1, ratio);
 		nk_label(ctx, "Speed option", NK_TEXT_ALIGN_CENTERED);
 		nk_property_float(ctx, "Speed:", 0., &camera->speed, 50., 0.01, 0.1);
+		nk_property_float(ctx, "Field of view:", 1., &camera->FOV, 360, 0.1, 0.1);
+		nk_labelf(ctx, NK_TEXT_ALIGN_CENTERED, "value: %f.2", light->constant);
 		nk_label(ctx, "Light option", NK_TEXT_ALIGN_CENTERED);
-		nk_property_float(ctx, "constant:", -1., &light->constant, 2.0, 0.001, 0.001);
-		nk_labelf(ctx, NK_TEXT_ALIGN_CENTERED, "value: %f", light->constant);
 		nk_property_float(ctx, "linear:", -1., &light->linear, 2.0, 0.00001, 0.00001);
 		nk_labelf(ctx, NK_TEXT_ALIGN_CENTERED, "value: %f", light->linear);
 		nk_property_float(ctx, "quadratic:", -1., &light->quadratic, 2.0, 0.000001, 0.000001);
