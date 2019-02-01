@@ -148,7 +148,6 @@ int main(void)
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//use shader program
 		glUseProgram(shaderProgram);
 
 		//add number, vector and matrix to shader
@@ -171,14 +170,11 @@ int main(void)
 			}
 			else if (!strcmp(planet[i].name, "Soleil"))
 			{
-				glUseProgram(backgroundShader);
 				createObject(textureArr[i], sphereVAO, objNbOfFaces, backgroundShader, getSize(i)/4, 0, 0, 0);
-				glUseProgram(shaderProgram);
 			}
 			else createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, getSize(i), planet[i].x, planet[i].y, planet[i].z);
 		}
-		
-		glUseProgram(backgroundShader);
+
 		createObject(background, sphereVAO, objNbOfFaces, backgroundShader, 30000.,0, 0, 0);
 
 		//check and call event

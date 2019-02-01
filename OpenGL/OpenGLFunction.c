@@ -39,6 +39,8 @@ void calculeView(Camera * camera, float time)
 
 void createObject(unsigned int texture, unsigned int shape, int faceNum, unsigned int shaderProgram, float size, float x, float y, float z)
 {
+	glUseProgram(shaderProgram);
+
 	if (texture != NULL)
 	{
 		glActiveTexture(GL_TEXTURE0);

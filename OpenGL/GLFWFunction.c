@@ -191,10 +191,10 @@ void processGUI(struct nk_context *ctx, Camera * camera, Light * light, Planet *
 			glm_lookat(camera->pos, lookPos, camera->upAxe, camera->view);
 		}
 		if (nk_button_label(ctx, "Mars")) moveCamPlanet(camera, planet, 5, 2);
-		if (nk_button_label(ctx, "Jupiter")) moveCamPlanet(camera, planet, 6, 14);
-		if (nk_button_label(ctx, "Saturne")) moveCamPlanet(camera, planet, 7, 13);
-		if (nk_button_label(ctx, "Uranus")) moveCamPlanet(camera, planet, 8, 10);
-		if (nk_button_label(ctx, "Neptune")) moveCamPlanet(camera, planet, 9, 10);
+		if (nk_button_label(ctx, "Jupiter")) moveCamPlanet(camera, planet, 6, 24);
+		if (nk_button_label(ctx, "Saturne")) moveCamPlanet(camera, planet, 7, 23);
+		if (nk_button_label(ctx, "Uranus")) moveCamPlanet(camera, planet, 8, 15);
+		if (nk_button_label(ctx, "Neptune")) moveCamPlanet(camera, planet, 9, 15);
 
 	}
 	nk_end(ctx);
