@@ -52,7 +52,7 @@ int main(void)
 	glEnable(GL_DEPTH_TEST);
 
 	//-------------- SHADER PROGRAM CREATION --------------//
-	//here linking all shader together
+
 	unsigned int shaderProgram;
 	unsigned int lightProgram;
 	unsigned int backgroundShader;
@@ -62,33 +62,26 @@ int main(void)
 	addProgShader("shader\\vertex.glsl", "shader\\textureNoLight.glsl", &backgroundShader);
 
 
+
 	//------------------ TEXTURE OPTION ------------------//
 
-
-	unsigned int jupiterTexture;
-	unsigned int marsTexture;
-	unsigned int mercureTexture;
 	unsigned int venusTexture;
-	unsigned int earthTexture;
-	unsigned int sunTexture;
 	unsigned int background;
-	unsigned int moonTexture;
-	unsigned int saturneTexture;
-	unsigned int uranusTexture;
-	unsigned int neptuneTexture;
 
 	unsigned int textureArr[10];
 
-	createTexture(&textureArr[0],"texture\\sun.jpg", TRUE);
-	createTexture(&textureArr[1],"texture\\earth.jpg", TRUE);
-	createTexture(&textureArr[2],"texture\\moon.jpg", TRUE);
-	createTexture(&textureArr[3],"texture\\mercury.jpg", TRUE);
-	createTexture(&textureArr[4],"texture\\venus.jpg", TRUE);
-	createTexture(&textureArr[5],"texture\\mars.jpg", TRUE);
-	createTexture(&textureArr[6],"texture\\jupiter.png", TRUE);
-	createTexture(&textureArr[7],"texture\\saturn.jpg", TRUE);
-	createTexture(&textureArr[8],"texture\\uranus.jpg", TRUE);
-	createTexture(&textureArr[9],"texture\\neptune.jpg", TRUE);
+	{
+		createTexture(&textureArr[0],"texture\\sun.jpg", TRUE);
+		createTexture(&textureArr[1],"texture\\earth.jpg", TRUE);
+		createTexture(&textureArr[2],"texture\\moon.jpg", TRUE);
+		createTexture(&textureArr[3],"texture\\mercury.jpg", TRUE);
+		createTexture(&textureArr[4],"texture\\venus.jpg", TRUE);
+		createTexture(&textureArr[5],"texture\\mars.jpg", TRUE);
+		createTexture(&textureArr[6],"texture\\jupiter.png", TRUE);
+		createTexture(&textureArr[7],"texture\\saturn.jpg", TRUE);
+		createTexture(&textureArr[8],"texture\\uranus.jpg", TRUE);
+		createTexture(&textureArr[9],"texture\\neptune.jpg", TRUE);
+	}
 	
 	createTexture(&venusTexture, "texture\\venus_atmosphere.jpg", TRUE);
 	createTexture(&background, "texture\\starmap.jpg", FALSE);
@@ -140,9 +133,16 @@ int main(void)
 	{
 		//input
 		processInput(window, &camera);
-		processGUI(ctx, &camera, &light);
+		processGUI(ctx, &camera, &light, planet);
 
 		glEnable(GL_DEPTH_TEST); //this allow the graphic pipeline to work
+
+		float time = glfwGetTime();
+		mat4 projection = GLM_MAT4_IDENTITY_INIT;
+		glm_perspective(glm_rad(camera.FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.f, projection);
+		initShader(shaderProgram, projection, camera.view);
+		initShader(backgroundShader, projection, camera.view);
+		calculeView(&camera, time);
 
 		//rendering
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -152,17 +152,9 @@ int main(void)
 		glUseProgram(shaderProgram);
 
 		//add number, vector and matrix to shader
-		float time = glfwGetTime();
 		addFloat(shaderProgram, "time", time);
-
 		sendLightInfo(light, shaderProgram);
 		addFloat(shaderProgram, "material.shininess", 32.0f); 
-		calculeView(&camera, time);
-
-		mat4 projection = GLM_MAT4_IDENTITY_INIT;
-		glm_perspective(glm_rad(camera.FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.f, projection);
-		addMat4(shaderProgram, "view", camera.view);
-		addMat4(shaderProgram, "projection", projection);
 
 		//draw
 
@@ -180,9 +172,6 @@ int main(void)
 			else if (!strcmp(planet[i].name, "Soleil"))
 			{
 				glUseProgram(backgroundShader);
-				addMat4(backgroundShader, "view", camera.view);
-				addMat4(backgroundShader, "projection", projection);
-
 				createObject(textureArr[i], sphereVAO, objNbOfFaces, backgroundShader, getSize(i)/4, 0, 0, 0);
 				glUseProgram(shaderProgram);
 			}
@@ -190,9 +179,6 @@ int main(void)
 		}
 		
 		glUseProgram(backgroundShader);
-		addMat4(backgroundShader, "view", camera.view);
-		addMat4(backgroundShader, "projection", projection);
-
 		createObject(background, sphereVAO, objNbOfFaces, backgroundShader, 30000.,0, 0, 0);
 
 		//check and call event

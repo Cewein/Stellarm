@@ -397,7 +397,8 @@ void getPlanetPosition(Planet * planets)
 	}
 	else
 	{
-		printf("Une erreur s'est produite lors de la connexion a la BDD!");
+		printf("Une erreur s'est produite lors de la connexion a la BDD!\n");
+		system("pause");
 	}
 	mysql_close(mysql);
 }

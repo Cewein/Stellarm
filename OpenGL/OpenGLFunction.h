@@ -10,7 +10,7 @@
 /*!
 this struct is a OpenGL cam, it need everything for a camera in openGL in C
 */
-typedef struct Cams {
+typedef struct Camera {
 	//time for the cam
 	float deltaTime;
 	float lastFrame;
@@ -49,4 +49,4 @@ void createObject(unsigned int texture, unsigned int shape, int faceNum, unsigne
 
 void createLum(unsigned int shape, int faceNum, unsigned int shaderProgram, vec3 lightPos);
 float * loadObj(char * file, int * nbOfFaces);
-void glBindObj(float * objArray, int objNbOfFaces, unsigned int VBO, unsigned int VAO);
+void glBindObj(float * objArray, int objNbOfFaces, unsigned int * VBO, unsigned int * VAO);

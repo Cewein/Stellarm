@@ -8,6 +8,7 @@
 
 #include "nuklear.h"
 #include "nuklear_glfw_gl3.h"
+#include "define.h"
 
 #define SCR_WIDTH 1920
 #define SCR_HEIGHT 1080
@@ -17,6 +18,7 @@
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window, Camera * camera);
 void processMouse(GLFWwindow * window, Camera * camera);
-void processGUI(struct nk_context *ctx, Camera * camera,Light * light);
+void processGUI(struct nk_context *ctx, Camera * camera,Light * light, Planet * planet);
 void initGUI(struct nk_context **ctx, GLFWwindow* window);
 GLFWwindow * initWindow(char * winName);
+void moveCamPlanet(Camera * camera, Planet * planet, int planetNum, int planetDist);

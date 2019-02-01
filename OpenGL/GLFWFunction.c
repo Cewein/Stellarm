@@ -132,7 +132,7 @@ GLFWwindow * initWindow(char * winName)
 	return window;
 }
 
-void processGUI(struct nk_context *ctx, Camera * camera, Light * light)
+void processGUI(struct nk_context *ctx, Camera * camera, Light * light, Planet * planet)
 {
 	nk_glfw3_new_frame();
 	if (nk_begin(ctx, "Param", nk_rect(5, 5, 250, 300), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
@@ -151,7 +151,7 @@ void processGUI(struct nk_context *ctx, Camera * camera, Light * light)
 	}
 	nk_end(ctx);
 
-	if (nk_begin(ctx, "Time", nk_rect(500, 5, 250, 300), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
+	if (nk_begin(ctx, "Time", nk_rect(320, 5, 250, 300), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
 	{
 		time_t curtime;
 		struct tm * timeStr;
@@ -172,6 +172,38 @@ void processGUI(struct nk_context *ctx, Camera * camera, Light * light)
 		nk_property_int(ctx, "Second:", 0, &timeStr->tm_sec, 59, 1, 1);
 
 		if (nk_button_label(ctx, "Done"));
+
+	}
+	nk_end(ctx);
+	
+	if (nk_begin(ctx, "Planet", nk_rect(640, 5, 250, 300), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
+	{
+		nk_layout_row_static(ctx, 30, 100, 2);
+		if (nk_button_label(ctx, "Soleil")) moveCamPlanet(camera, planet, 0, 70);
+		if (nk_button_label(ctx, "Mercure"))  moveCamPlanet(camera, planet, 3, 2);
+		if (nk_button_label(ctx, "Venus")) moveCamPlanet(camera, planet, 4, 3);
+		if (nk_button_label(ctx, "Terre")) moveCamPlanet(camera, planet, 1, 3);
+		if (nk_button_label(ctx, "Lune"))
+		{
+			vec3 newPos = { planet[1].x + planet[2].x + 2., planet[1].y + planet[2].y + 2., planet[1].z + planet[2].z + 2. };
+			vec3 lookPos = { planet[1].x + planet[2].x, planet[1].y + planet[2].y, planet[1].z + planet[2].z };
+			glm_vec3_copy(newPos, camera->pos);
+			glm_lookat(camera->pos, lookPos, camera->upAxe, camera->view);
+		}
+		if (nk_button_label(ctx, "Mars")) moveCamPlanet(camera, planet, 5, 2);
+		if (nk_button_label(ctx, "Jupiter")) moveCamPlanet(camera, planet, 6, 14);
+		if (nk_button_label(ctx, "Saturne")) moveCamPlanet(camera, planet, 7, 13);
+		if (nk_button_label(ctx, "Uranus")) moveCamPlanet(camera, planet, 8, 10);
+		if (nk_button_label(ctx, "Neptune")) moveCamPlanet(camera, planet, 9, 10);
+
 	}
 	nk_end(ctx);
 }	
+
+void moveCamPlanet(Camera * camera, Planet * planet, int planetNum, int planetDist)
+{
+	vec3 newPos = { planet[planetNum].x + planetDist, planet[planetNum].y + planetDist, planet[planetNum].z + planetDist };
+	vec3 lookPos = { planet[planetNum].x, planet[planetNum].y, planet[planetNum].z };
+	glm_vec3_copy(newPos, camera->pos);
+	glm_lookat(camera->pos, lookPos, camera->upAxe, camera->view);
+}
