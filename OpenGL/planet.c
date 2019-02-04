@@ -95,7 +95,6 @@ double longitudeHelioPlanet(double omega, double i, double argument) {
 	if (longitude < 0) {
 		longitude = longitude + 360;
 	}
-	printf("longitude Helio : %lf \n", longitude); // enleve O a l'argument si tu veux la longitude helio
 	return longitude;
 }
 
@@ -126,9 +125,7 @@ double longitudeGeoPlanet(double distance, double latitude, double longitude, do
 	double N = NPlanet(distance, latitude, longitude, longitudeSol);
 	double D = DPlanet(distance, latitude, longitude, longitudeSol, rayonSol);
 	double longitudeGeo = N / D;
-	printf("uno longitude : %lf \n", longitudeGeo);
 	longitudeGeo = RAD2DEG(atan(longitudeGeo)) + longitudeSol;
-	printf("dos longitude : %lf \n", longitudeGeo);
 	if (longitudeGeo > 360) {
 		int count = (int)longitudeGeo / 360;
 		longitudeGeo = longitudeGeo - count * 360;
@@ -209,10 +206,6 @@ double azimutPlanet(MYSQL *mysql, char* astre, double year, double month, double
 	double longitudeGeo = longitudeGeoPlanet(distance, latitudeEclipt, longitudeEclipt, longitudeSol, distanceSol);
 	double distanceGeo = distanceEarthPlanet(distance, latitudeEclipt, longitudeEclipt, longitudeSol, distanceSol);
 	double latitudeGeo = latitudeGeoPlanet(distance, latitudeEclipt, distanceGeo);
-
-	printf("distanceGeo = %lf \n", distanceGeo);
-	printf("longitudeGeo = %lf \n", longitudeGeo);
-	printf("latitudeGeo = %lf \n", latitudeGeo);
 
 	double* ascensionDroite = TransformInLongitudeEquatorial(longitudeGeo, latitudeGeo, oblique);
 	double* declinaison = TransformInLatitudeEquatorial(longitudeGeo, latitudeGeo, oblique);

@@ -118,7 +118,6 @@ void stockValues(MYSQL *mysql, char* query, int *numberField, char **stock, char
 			stockDouble(mysql, query, *(numberField + i), *(stock + i));
 		}
 		else if ((_stricmp(*(type + i), "char") == 0) || (_stricmp(*(type + i), "string") == 0)) {
-			printf("%s %d %s \n", query, numberField, *stock);
 			stockString(mysql, query, *(numberField + i), *(stock + i));
 		}
 		else {
