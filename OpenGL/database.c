@@ -1,3 +1,4 @@
+#pragma warning(disable : 4996)
 #include <stdlib.h>
 #include <stdio.h>
 #include "database.h"
@@ -39,11 +40,11 @@ char* valueInsert(char* query, char* value) {
 
 // FUNCTIONS WITH SELECT
 // seeResult : Permite to see the fields of the query
-void seeResult(MYSQL *mysql, char* query) {
+int seeResult(MYSQL *mysql, char* query) {
 	mysql_query(mysql, query);
 	MYSQL_RES *result = mysql_store_result(mysql);
 	int num_fields = mysql_num_fields(result);
-
+	int count = 0;
 	MYSQL_ROW row;
 
 	while ((row = mysql_fetch_row(result)))
@@ -51,10 +52,30 @@ void seeResult(MYSQL *mysql, char* query) {
 		for (int i = 0; i < num_fields; i++)
 		{
 			printf("%s ", row[i] ? row[i] : "NULL");
+			count++;
 		}
 		printf("\n");
 	}
+	return count;
 }
+
+int seeResultExist(MYSQL *mysql, char* query) {
+	mysql_query(mysql, query);
+	MYSQL_RES *result = mysql_store_result(mysql);
+	int num_fields = mysql_num_fields(result);
+	int count = 0;
+	MYSQL_ROW row;
+
+	while ((row = mysql_fetch_row(result)))
+	{
+		for (int i = 0; i < num_fields; i++)
+		{
+			count++;
+		}
+	}
+	return count;
+}
+
 
 // stockInt : Stock a int of the bdd in a pointer
 void stockInt(MYSQL *mysql, char* query, int numberField, int* stock) {
@@ -82,7 +103,7 @@ void stockString(MYSQL *mysql, char* query, int numberField, char* stock) {
 	MYSQL_RES *result = mysql_store_result(mysql);
 	MYSQL_ROW row;
 	row = mysql_fetch_row(result);
-	strcpy_s(stock, strlen(stock), row[numberField]);
+	strcpy(stock, row[numberField]);
 	mysql_free_result(result);
 }
 
@@ -97,6 +118,7 @@ void stockValues(MYSQL *mysql, char* query, int *numberField, char **stock, char
 			stockDouble(mysql, query, *(numberField + i), *(stock + i));
 		}
 		else if ((_stricmp(*(type + i), "char") == 0) || (_stricmp(*(type + i), "string") == 0)) {
+			printf("%s %d %s \n", query, numberField, *stock);
 			stockString(mysql, query, *(numberField + i), *(stock + i));
 		}
 		else {

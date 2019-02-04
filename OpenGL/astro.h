@@ -32,5 +32,8 @@ void getPlanetPosition(Planet * planets);
 void degresToPwm(Servo *servo);
 void degresToPwm2(Servo *servo);
 int sizeForString(int value);
+int checkMonth(int day, int month, int year);
+int convertToLocalTime(double *longitude, int *hour, int *minutes, int *day, int *month, int *year);
+int convertToUTCTime(double *longitude, double *hour, double *minutes, double *day, double *month, double *year);
 
 double getSize(int x);

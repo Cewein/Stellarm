@@ -9,9 +9,10 @@
 #include "nuklear.h"
 #include "nuklear_glfw_gl3.h"
 #include "define.h"
+#include "ihm.h"
 
-#define SCR_WIDTH 1920
-#define SCR_HEIGHT 1080
+#define SCR_WIDTH 1200
+#define SCR_HEIGHT 900
 
 #include "OpenGLFunction.h"
 

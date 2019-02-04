@@ -47,6 +47,25 @@ void processInput(GLFWwindow* window, Camera * camera)
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 		camera->FOV = 1;
 	else camera->FOV = 45;
+	
+	if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
+	{
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		InterfaceCity("localhost");
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+	if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
+	{
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		InterfaceTime("localhost", "");
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+	if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
+	{
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		mainIHM();
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) 
 	{
@@ -58,6 +77,7 @@ void processInput(GLFWwindow* window, Camera * camera)
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		processMouse(window, camera);
 	}
+
 
 
 }
@@ -113,7 +133,7 @@ GLFWwindow * initWindow(char * winName)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow * window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, winName, glfwGetPrimaryMonitor(), NULL);
+	GLFWwindow * window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, winName, NULL, NULL);
 	if (window == NULL)
 	{
 		printf("Failed to create GLFW Window\n");
@@ -143,40 +163,10 @@ void processGUI(struct nk_context *ctx, Camera * camera, Light * light, Planet *
 		nk_property_float(ctx, "Speed:", 0., &camera->speed, 50., 0.01, 0.1);
 		nk_property_float(ctx, "Field of view:", 1., &camera->FOV, 360, 0.1, 0.1);
 		nk_labelf(ctx, NK_TEXT_ALIGN_CENTERED, "value: %f.2", light->constant);
-		nk_label(ctx, "Light option", NK_TEXT_ALIGN_CENTERED);
-		nk_property_float(ctx, "linear:", -1., &light->linear, 2.0, 0.00001, 0.00001);
-		nk_labelf(ctx, NK_TEXT_ALIGN_CENTERED, "value: %f", light->linear);
-		nk_property_float(ctx, "quadratic:", -1., &light->quadratic, 2.0, 0.000001, 0.000001);
-		nk_labelf(ctx, NK_TEXT_ALIGN_CENTERED, "value: %f", light->quadratic);
-	}
-	nk_end(ctx);
-
-	if (nk_begin(ctx, "Time", nk_rect(320, 5, 250, 300), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
-	{
-		time_t curtime;
-		struct tm * timeStr;
-		time(&curtime);
-		timeStr = gmtime(&curtime);
-		float ratio[] = { 220, 150 };
-		nk_layout_row(ctx, NK_STATIC, 30, 1, ratio);
-		nk_label(ctx, "Select date", NK_TEXT_ALIGN_CENTERED);
-		int year = timeStr->tm_year + 1900;
-		nk_property_int(ctx, "Year:", 1900, &year, INFINITE, 1, 1);
-		timeStr->tm_year = year - 1900;
-		int month = timeStr->tm_mon + 1;
-		nk_property_int(ctx, "Month:", 1, &month, 12, 1, 1);
-		timeStr->tm_mon = month - 1;
-		nk_property_int(ctx, "Day:", 1, &timeStr->tm_mday, 31, 1, 1);
-		nk_property_int(ctx, "Hour:", 0, &timeStr->tm_hour, 23, 1, 1);
-		nk_property_int(ctx, "Minute:", 0, &timeStr->tm_min, 59, 1, 1);
-		nk_property_int(ctx, "Second:", 0, &timeStr->tm_sec, 59, 1, 1);
-
-		if (nk_button_label(ctx, "Done"));
-
 	}
 	nk_end(ctx);
 	
-	if (nk_begin(ctx, "Planet", nk_rect(640, 5, 250, 300), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
+	if (nk_begin(ctx, "Planet", nk_rect(320, 5, 250, 300), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
 	{
 		nk_layout_row_static(ctx, 30, 100, 2);
 		if (nk_button_label(ctx, "Soleil")) moveCamPlanet(camera, planet, 0, 70);
@@ -185,7 +175,7 @@ void processGUI(struct nk_context *ctx, Camera * camera, Light * light, Planet *
 		if (nk_button_label(ctx, "Terre")) moveCamPlanet(camera, planet, 1, 3);
 		if (nk_button_label(ctx, "Lune"))
 		{
-			vec3 newPos = { planet[1].x + planet[2].x + 2., planet[1].y + planet[2].y + 2., planet[1].z + planet[2].z + 2. };
+			vec3 newPos = { planet[1].x + (planet[2].x * 50) + 2., planet[1].y + (planet[2].y * 50) + 2., planet[1].z + (planet[2].z * 50) + 2. };
 			vec3 lookPos = { planet[1].x + planet[2].x, planet[1].y + planet[2].y, planet[1].z + planet[2].z };
 			glm_vec3_copy(newPos, camera->pos);
 			glm_lookat(camera->pos, lookPos, camera->upAxe, camera->view);

@@ -402,3 +402,172 @@ void getPlanetPosition(Planet * planets)
 	}
 	mysql_close(mysql);
 }
+
+int checkMonth(int day, int month, int year) {
+	if (day == 31) {
+		if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) {
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
+	else if (day == 30) {
+		if (month != 2) {
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
+	else if (day == 29) {
+		if (month == 2) {
+			if (year % 4 == 0) {
+				if (year % 100 != 0) {
+					return 1;
+				}
+				else {
+					if (year % 400 == 0) {
+						return 1;
+					}
+					else {
+						return 0;
+					}
+				}
+			}
+			else {
+				return 0;
+			}
+		}
+		else {
+			return 1;
+		}
+	}
+	else {
+		return 1;
+	}
+}
+
+int convertToLocalTime(double *longitude, int *hour, int *minutes, int *day, int *month, int *year) {
+	int longitudeInt = (int)*longitude;
+	*minutes += longitudeInt * 4;
+	if (*minutes > 60) {
+		int keepHour = *minutes / 60;
+		*minutes = *minutes % 60;
+		*hour = *hour + keepHour;
+		if (*hour >= 24) {
+			*hour = *hour - 24;
+			*day += 1;
+			if (!checkMonth(*day, *month, *year) || *day > 31) {
+				*day = 1;
+				*month += 1;
+				if (*month > 12) {
+					*month = 1;
+					*year += 1;
+					return 1;
+				}
+				else {
+					return 1;
+				}
+			}
+			else {
+				return 1;
+			}
+		}
+		else {
+			return 1;
+		}
+	}
+	else if (*minutes < 0) {
+		int keepHour = *minutes / 60;
+		*minutes = 60 + (*minutes % 60);
+		*hour = *hour + keepHour - 1;
+		if (*hour < 0) {
+			*hour = *hour + 24;
+			*day -= 1;
+			if (*day < 1) {
+				*month -= 1;
+				if (*month < 1) {
+					*month = 12;
+					*year -= 1;
+				}
+				*day = 31;
+				while (!checkMonth(*day, *month, *year)) {
+					*day -= 1;
+				}
+				return 1;
+			}
+			else {
+				return 1;
+			}
+		}
+		else {
+			return 1;
+		}
+	}
+	else {
+		return 1;
+	}
+}
+
+int convertToUTCTime(double *longitude, double *hour, double *minutes, double *day, double *month, double *year) {
+	int longitudeInt = (int)*longitude;
+	*minutes += -longitudeInt * 4;
+	if (*minutes > 60) {
+		int keepHour = *minutes / 60;
+		*minutes = (int)*minutes % 60;
+		*hour = *hour + keepHour;
+		if (*hour >= 24) {
+			*hour = *hour - 24;
+			*day += 1;
+			if (!checkMonth(*day, *month, *year) || *day > 31) {
+				*day = 1;
+				*month += 1;
+				if (*month > 12) {
+					*month = 1;
+					*year += 1;
+					return 1;
+				}
+				else {
+					return 1;
+				}
+			}
+			else {
+				return 1;
+			}
+		}
+		else {
+			return 1;
+		}
+	}
+	else if (*minutes < 0) {
+		int keepHour = *minutes / 60;
+		*minutes = 60 + ((int)*minutes % 60);
+		*hour = *hour + keepHour - 1;
+		if (*hour < 0) {
+			*hour = *hour + 24;
+			*day -= 1;
+			if (*day < 1) {
+				*month -= 1;
+				if (*month < 1) {
+					*month = 12;
+					*year -= 1;
+				}
+				*day = 31;
+				while (!checkMonth(*day, *month, *year)) {
+					*day -= 1;
+				}
+				return 1;
+			}
+			else {
+				return 1;
+			}
+		}
+		else {
+			return 1;
+		}
+	}
+	else {
+		return 1;
+	}
+}

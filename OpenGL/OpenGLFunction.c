@@ -87,7 +87,7 @@ float * loadObj(char * file, int * nbOfFaces)
 
 		data_len = fsize(objFile);
 		char * data = freadInArray(objFile);
-		printf("filesize : %d\n", (int)data_len);
+		//printf("filesize : %d\n", (int)data_len);
 		unsigned int flags = TINYOBJ_FLAG_TRIANGULATE;
 		int ret = tinyobj_parse_obj(&attrib, &shapes, &num_shapes, &materials, &num_materials, data, data_len, flags);
 	}

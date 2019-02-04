@@ -8,6 +8,7 @@ in vec3 fragPos;
 
 uniform float time;
 uniform vec3 viewPos;
+uniform float attenu;
 
 struct Material {
 	sampler2D diffuse;
@@ -39,9 +40,9 @@ void main()
 	//ambiant
 	vec3 fullBrigthTex = vec3(texture(material.diffuse, TexCoord));
 
-	vec3 attenuation = vec3(0.2);
+	vec3 attenuation = vec3(attenu);
 
 	//output
-	vec3 result = fullBrigthTex * attenuation;
+	vec3 result = fullBrigthTex + attenuation;
 	fragColor = vec4(result, 1.0);
 }

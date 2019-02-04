@@ -55,7 +55,9 @@ void main()
 	float distance = length(light.position - fragPos);
 	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
+	//vec3 emissive = vec3(texture(material.emissive, TexCoord).rgb);
+
 	//output
-	vec3 result = ((ambient + diffuse + specular) * attenuation);
+	vec3 result = ((ambient + diffuse + specular) * attenuation );
 	fragColor = vec4(result, 1.0);
 }

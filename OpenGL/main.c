@@ -11,9 +11,6 @@
 
 #include "astro.h"
 
-#define SCR_WIDTH 1920
-#define SCR_HEIGHT 1080
-
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
@@ -39,14 +36,14 @@ int main(void)
 	unsigned int sphereVBO;
 	unsigned int sphereVAO;
 	int objNbOfFaces;
-	float * objArray = loadObj("JUPITER.obj", &objNbOfFaces);
+	float * objArray = loadObj("sphere.obj", &objNbOfFaces);
 	glBindObj(objArray, objNbOfFaces, &sphereVBO, &sphereVAO);
 
-	unsigned int flippedVBO;
-	unsigned int flippedVAO;
-	int flippedFaces;
-	float * flippedArray = loadObj("flippedSphere.obj", &flippedFaces);
-	glBindObj(flippedArray, flippedFaces, &flippedVBO, &flippedVAO);
+	unsigned int bunnyVBO;
+	unsigned int bunnyVAO;
+	int bunnyFaces;
+	float * bunnyArray = loadObj("bunnyLow.obj", &bunnyFaces);
+	glBindObj(bunnyArray, bunnyFaces, &bunnyVBO, &bunnyVAO);
 
 	//enable the z buffer
 	glEnable(GL_DEPTH_TEST);
@@ -54,11 +51,11 @@ int main(void)
 	//-------------- SHADER PROGRAM CREATION --------------//
 
 	unsigned int shaderProgram;
-	unsigned int lightProgram;
+	unsigned int sunProgram;
 	unsigned int backgroundShader;
 	
 	addProgShader("shader\\vertex.glsl", "shader\\texture.glsl", &shaderProgram);
-	addProgShader("shader\\vertexNotexture.glsl", "shader\\lightFrag.glsl", &lightProgram);
+	addProgShader("shader\\vertexNotexture.glsl", "shader\\lightFrag.glsl", &sunProgram);
 	addProgShader("shader\\vertex.glsl", "shader\\textureNoLight.glsl", &backgroundShader);
 
 
@@ -101,12 +98,12 @@ int main(void)
 
 	Camera camera = {
 		.view = GLM_MAT4_IDENTITY_INIT,
-		.pos = { 0.f,5.f,10.f },
+		.pos = { 0.f,50.f,100.f },
 		.target = { 0.f, 0.f, 0.f },
 		.upAxe = { 0.0f, 1.0f, 0.0f },
 		.front = { 0.0f, 0.0f, -1.0 },
-		.yaw = -90.f,
-		.pitch = -45.f,
+		.yaw = -75.f,
+		.pitch = -75.f,
 		.FOV = 45.f,
 		.lastX = (float)SCR_HEIGHT / 2,
 		.lastY = (float)SCR_WIDTH / 2,
@@ -117,7 +114,7 @@ int main(void)
 
 	Light light = {
 		.diffuse = { 0.5f, 0.5f, 0.5f },
-		.ambiant = { 0.02f, 0.02f, 0.02f },
+		.ambiant = { 0.1f, 0.1f, 0.1f },
 		.specular = { 1.f, 1.f, 1.f },
 		.position = { 0.0f, 0.0f, 0.0f },
 		.watcher = { camera.pos[0],camera.pos[1], camera.pos[2] },
@@ -142,6 +139,7 @@ int main(void)
 		glm_perspective(glm_rad(camera.FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100000.f, projection);
 		initShader(shaderProgram, projection, camera.view);
 		initShader(backgroundShader, projection, camera.view);
+		initShader(sunProgram, projection, camera.view);
 		calculeView(&camera, time);
 
 		//rendering
@@ -161,16 +159,19 @@ int main(void)
 		{
 			if (!strcmp(planet[i].name, "Lune"))
 			{
-				createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, getSize(i), planet[i].x * 100 + planet[i-1].x, planet[i].y * 100 + planet[i-1].y, planet[i].z * 100 + planet[i-1 ].z);
+				createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, getSize(i), planet[i].x * 50 + planet[i-1].x, planet[i].y * 50 + planet[i-1].y, planet[i].z * 50 + planet[i-1 ].z);
+				createObject(textureArr[i-2], bunnyVAO, bunnyFaces, shaderProgram, 0.5, planet[i-1].x, planet[i-1].y, planet[i-1 ].z);
 			}
 			else if (!strcmp(planet[i].name, "Venus"))
 			{
 				createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, getSize(i), planet[i].x, planet[i].y, planet[i].z);
-				createObject(venusTexture, flippedVAO, objNbOfFaces, shaderProgram, 1.2, planet[i].x, planet[i].y, planet[i].z);
+				createObject(venusTexture, sphereVAO, objNbOfFaces, shaderProgram, 1.2, planet[i].x, planet[i].y, planet[i].z);
 			}
 			else if (!strcmp(planet[i].name, "Soleil"))
 			{
-				createObject(textureArr[i], sphereVAO, objNbOfFaces, backgroundShader, getSize(i)/4, 0, 0, 0);
+				addFloat(backgroundShader, "attenu", 5.);
+				createObject(textureArr[i], sphereVAO, objNbOfFaces, backgroundShader, getSize(i)/32, 0, 0, 0);
+				addFloat(backgroundShader, "attenu", -0.2);
 			}
 			else createObject(textureArr[i], sphereVAO, objNbOfFaces, shaderProgram, getSize(i), planet[i].x, planet[i].y, planet[i].z);
 		}
@@ -186,7 +187,7 @@ int main(void)
 	free(objArray);
 
 	glDeleteVertexArrays(1, &sphereVAO);
-	glDeleteVertexArrays(1, &lightProgram);
+	glDeleteVertexArrays(1, &sunProgram);
 	glDeleteBuffers(1, &sphereVBO);
 	nk_glfw3_shutdown();
 	glfwTerminate();
