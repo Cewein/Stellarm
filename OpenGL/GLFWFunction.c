@@ -44,23 +44,24 @@ void processInput(GLFWwindow* window, Camera * camera)
 		glm_normalize(tmp);
 		glm_vec3_muladds(tmp, camSpeed, camera->pos);
 	}
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		camera->FOV = 1;
-	else camera->FOV = 45;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		camera->FOV = 5;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
+		camera->FOV = 45;
 	
-	if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		InterfaceCity("localhost");
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
-	if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		InterfaceTime("localhost", "");
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
-	if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		mainIHM();
@@ -162,7 +163,6 @@ void processGUI(struct nk_context *ctx, Camera * camera, Light * light, Planet *
 		nk_label(ctx, "Speed option", NK_TEXT_ALIGN_CENTERED);
 		nk_property_float(ctx, "Speed:", 0., &camera->speed, 50., 0.01, 0.1);
 		nk_property_float(ctx, "Field of view:", 1., &camera->FOV, 360, 0.1, 0.1);
-		nk_labelf(ctx, NK_TEXT_ALIGN_CENTERED, "value: %f.2", light->constant);
 	}
 	nk_end(ctx);
 	

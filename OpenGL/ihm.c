@@ -5,7 +5,7 @@ int InterfaceArm(char *serveur) {
 	char *follow = malloc(6);
 	char *planet = malloc(10);
 	int checkPlanet = 1;
-	printf("/////////////STELLARM///////////////\n");
+	printf("\n/////////////STELLARM///////////////\n");
 	printf("Bienvenue sur l'interface de controle du bras robot de Stellarm, rentrez vos informations pour que le bras vous retourne la position de l'astre dans le ciel\n");
 	printf("Quelle astre voulez voir ? \n1.Soleil \n2.Lune \n3.Mercure \n4.Venus \n5.Mars \n6.Jupiter \n7.Saturne \n8.Uranus \n9.Neptune\n");
 	do {
@@ -108,7 +108,7 @@ int InterfaceArm(char *serveur) {
 			sprintf_s(minutes, 6, "%d", localTime.tm_min);
 		}
 		else {
-			
+
 			int verifYear = -4717;
 			int verifMonth = 0;
 			int verifDay = 0;
@@ -128,12 +128,12 @@ int InterfaceArm(char *serveur) {
 				else if (_stricmp(typeHour, "Locale") == 0 || strcmp(typeHour, "2") == 0) {
 					follow = "1";
 					typeHourAgain = 0;
-					printf("\nAttention ! L'heure utilise dans votre ville ou pays n'est pas forcement la vraie heure locale, voulez voir la vraie heure de votre ville pour la comparer avec la votre et pouvoir l'utiliser? (oui/non)\n");
+					printf("\nVoulez voir la vraie heure de votre ville pour la comparer avec la votre? (oui/non)\n");
 					do {
 						gets(seeInterfaceTime, 5);
 						if (_stricmp(seeInterfaceTime, "oui") == 0) {
 							printf("\n");
-							InterfaceTime(serveur,place);
+							InterfaceTime(serveur, place);
 						}
 					} while (!(_stricmp(seeInterfaceTime, "oui") == 0 || _stricmp(seeInterfaceTime, "non") == 0));
 				}
@@ -148,7 +148,7 @@ int InterfaceArm(char *serveur) {
 				gets(year, 6);
 				sscanf_s(year, "%d", &verifYear);
 			} while (verifYear < -4716 || verifYear > 3000);
-		
+
 
 			printf("Veuillez saisir un mois entre 1 et 12 : \n");
 			do {
@@ -214,7 +214,7 @@ char *InterfaceCity(char *serveur) {
 		double verifLongitude;
 		double verifLatitude;
 		int count = 0;
-		printf("Bienvenue sur l'interface d'ajout de villes\n");
+		printf("\nBienvenue sur l'interface d'ajout de villes\n");
 		printf("Donnez le nom de la ville :\n");
 		gets(place, 20);
 		printf("Donnez la longitude de la ville :\n");
@@ -237,13 +237,13 @@ char *InterfaceCity(char *serveur) {
 			sscanf_s(latitude, "%lf", &verifLatitude);
 			count++;
 		} while (verifLatitude < -90 || verifLatitude > 90);
-		
+
 		char* query = "INSERT INTO CITY(name, latitude, longitude) VALUES('?', ?, ?)";
 		char* insert[] = { place, latitude, longitude };
 		query = valuesInsert(query, insert, 3);
 		mysql_query(mysql, query);
 	}
-	else{
+	else {
 		printf("La connexion a la BDD a echoue");
 		return NULL;
 	}
@@ -260,7 +260,7 @@ int InterfaceTime(char *serveur, char *city) {
 	{
 		if (_strcmpi(city, "") == 0) {
 			int count = 0;
-			printf("Bienvenue sur l'interface permettant de connaitre le decalage horaire depuis Greenwich (+0)\n");
+			printf("\nBienvenue sur l'interface permettant de connaitre le decalage horaire depuis Greenwich (+0)\n");
 			char *queryCity = "SELECT name FROM CITY ORDER BY name ASC";
 			seeResult(mysql, queryCity);
 			printf("\nDonnez le nom de la ville dont vous voulez connaitre l'heure reelle :\n");
