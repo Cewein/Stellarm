@@ -14,6 +14,7 @@ void createProgramShader(unsigned int * progam, unsigned int * vertex, unsigned 
 
 void addProgShader(char const * vertexFile, char const * fragmentFile, unsigned int * program);
 
+void initShader(unsigned int progId, mat4 projection, mat4 view);
 void const addInt(unsigned int progId, char * name, int value);
 void const addFloat(unsigned int progId, char * name, float value);
 void const addVec3(unsigned int progId, char * name, vec3 value);

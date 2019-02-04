@@ -70,6 +70,13 @@ void addProgShader(char const * vertexFile, char const * fragmentFile, unsigned 
 	return;
 }
 
+void initShader(unsigned int progId, mat4 projection, mat4 view)
+{
+	glUseProgram(progId);
+	addMat4(progId, "view", view);
+	addMat4(progId, "projection", projection);
+}
+
 void const addInt(unsigned int progId, char * name, int value)
 {
 	glUniform1i(glGetUniformLocation(progId, name), value);

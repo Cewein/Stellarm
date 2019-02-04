@@ -1,129 +1,7 @@
-#include "positionPlanet.h"
-#include <stdio.h>
-#include <stdlib.h>
-
-// hourdecimal : Permite to convert a hour with minutes and seconds to an hour decimal (ex : 12h30 = 12,5)
-double hourdecimal(int hour, int min, int sec) {
-	double newMin = min / 60;
-	double newSec = sec / 3600;
-	double hourdec = hour + newMin + newSec;
-	return hourdec;
-}
-
-// jourjulien : Permite to calcul julien day (it's the number of days after -4716)
-double jourjulien(int year, int month, int day, double hour) {
-	double newDay = day + hour / 24;
-	if (month <= 2) {
-		year = year - 1;
-		month = month + 12;
-	}
-	int a = (int)year / 100;
-	int b = 2 - a + (int)a / 4;
-	double julien = ((int)(365.25*(year + 4716))) + ((int)(30.60001 * (month + 1))) + newDay + b - 1524.5;
-	return julien;
-}
-
-// t : Time use for every functions of this project
-double t(double julien) {
-	double T;
-	T = (julien - 2451545.0) / 36525;
-	return T;
-}
-
-// longitudeSol : Permite to calcul the longitude of the sun in degres or radian
-double longitudeSol(double T, char type) {
-	double longitude = 280.46646 + 36000.76983 * T + 0.0003032 * (T*T);
-	int count = (int)longitude / 360;
-	longitude = longitude - count * 360;
-	if (type == 'r' || type == 'R')
-		longitude = DEG2RAD(longitude);
-	return longitude;
-}
-
-// anomalieSolForSol : Permite to calcul anomalie of the sun
-double anomalieSolForSol(double T, char type) {
-	double anomalie = 357.52911 + 35999.05029 * T - 0.0001537 * (T*T);
-	int count = (int)anomalie / 360;
-	anomalie = anomalie - count * 360;
-	if (type == 'r' || type == 'R')
-		anomalie = DEG2RAD(anomalie);
-	return anomalie;
-}
-
-// excentriciteForSol : Permite to calcul excentricite of the sun
-double excentriciteForSol(double T, char type) {
-	double excentricite = 0.016708634 - 0.000042037 * T - 0.0000001267 * (T*T);
-	if (type == 'r' || type == 'R')
-		excentricite = DEG2RAD(excentricite);
-	return excentricite;
-}
-
-// centreSol : 
-double centreSol(double T, double anomalie, char type) {
-	double centre = (1.914602 - 0.004817 * T - 0.000014 * (T*T)) * sin(anomalie) + (0.019993 - 0.000101 * T) * sin(2 * anomalie) + 0.000289 * sin(3 * anomalie);
-	if (type == 'r' || type == 'R')
-		centre = DEG2RAD(centre);
-	return centre;
-}
-
-// reallongitudeSol : Permite to calcul the real longitude of the sun
-double reallongitudeSol(double T) {
-	double longitude = longitudeSol(T, 'd');
-	double anomalie = anomalieSolForSol(T, 'r');
-	double centre = centreSol(T, anomalie, 'd');
-	double realLongitude = longitude + centre;
-	return realLongitude;
-}
-
-// omegaSol : Return a value for calcul ecliptique longitude (just after this function)
-double omegaSol(double T, char type) {
-	double omega = 125.04 - 1934.136 * T;
-	int count = (int)omega / 360;
-	omega = omega - count * 360;
-	if (type == 'r' || type == 'R')
-		omega = DEG2RAD(omega);
-	return omega;
-}
-
-// viewLongitudeSol : Permite to have ecliptique longitude of the sun
-double viewLongitudeSol(double T) {
-	double realLongitude = reallongitudeSol(T);
-	double omega = omegaSol(T, 'r');
-	double longitude = realLongitude - 0.00560 - 0.00478 * RAD2DEG(sin(omega));
-	return longitude;
-}
-
-// realAnomalieSol : Permite to calcul the real anomalie of the sun
-double realAnomalieSol(double T) {
-	double anomalieReal;
-	double anomalieMoy = anomalieSolForSol(T, 'r');
-	double centre = centreSol(T, anomalieMoy, 'r');
-	anomalieReal = anomalieMoy + centre;
-	return anomalieReal;
-}
-
-// DistanceTerreSol : Return the distance between the earth and the sun
-double distanceTerreSol(double T) {
-	double e = excentriciteForSol(T, 'r');
-	double v = realAnomalieSol(T);
-	double distance = 1.000001018 * (1 - e * e) / (1 + e * cos(v));
-	return distance;
-}
-
-void positionEarth(Planet *astre, struct tm now) {
-	double hourdec = hourdecimal(now.tm_hour, now.tm_min, now.tm_sec);
-	double julien = jourjulien(now.tm_year, now.tm_mon, now.tm_mday, hourdec);
-	double T = t(julien);
-	double longitudeView = viewLongitudeSol(T);
-	longitudeView += 180;
-	if (longitudeView >= 360) {
-		longitudeView -= 360;
-	}
-	double distance = distanceTerreSol(T);
-	astre->distance = distance;
-	astre->latitude = 0;
-	astre->longitude = longitudeView;
-}
+#include "moon.h"
+#include "astro.h"
+#include <math.h>
+#include <time.h>
 
 ///////// FUNCTIONS FOR MOON ////////////
 
@@ -374,7 +252,7 @@ double latitudeEcliptiqueForMoon(double T) {
 	return latitude;
 }
 
-// latitudeMoon : Permite to have the longitude, latitude and distance heliocentric of the moon
+// positionMoon : Permite to have the longitude, latitude and distance heliocentric of the moon
 void positionMoon(Planet *astre, struct tm now) {
 	double hourdec = hourdecimal(now.tm_hour, now.tm_min, now.tm_sec);
 	double julien = jourjulien(now.tm_year, now.tm_mon, now.tm_mday, hourdec);
@@ -384,210 +262,60 @@ void positionMoon(Planet *astre, struct tm now) {
 	astre->distance = 0.00256955529;
 }
 
-/////////////// PLANET FUNCTIONS (Mercure, Venus, Mars, Jupiter, Saturne, Uranus, Neptune) ////////////////
-
-// equinoxePlanet : Permite to stock in a value every values of the array of equinoxe
-void equinoxePlanet(MYSQL *mysql, char *planet, double** stock, double T) {
-
-	char query[] = "SELECT * FROM ASTRE WHERE name='?'";
-	char* newquery = malloc(strlen(query) + strlen(planet));
-	newquery = valueInsert(query, planet);
-
-	int a[3] = { 1, 2, 3 };
-	int e[4] = { 4, 5, 6, 7 };
-	int l[4] = { 8, 9, 10, 11 };
-	int i[4] = { 12, 13, 14, 15 };
-	int s[4] = { 16, 17, 18, 19 };
-	int p[4] = { 20, 21, 22, 23 };
-	int *fields[] = { a,e,l,i,s,p };
-	int size[6] = { 3,4,4,4,4,4 };
-
-	multiplyInValues(mysql, newquery, fields, stock, size, 6, T);
-	if (**(stock + 2) > 360) {
-		int count = (int)**(stock + 2) / 360;
-		**(stock + 2) = **(stock + 2) - count * 360;
-	}
-}
-
-// keplerPlanet : Permite to execute kepler formul and have the result
-double keplerPlanet(double P, double L, double e) {
-	int i;
-	double M = L - P;
-	if (P > L) {
-		M = M + 360;
-	}
-	double E = DEG2RAD(M);
-	M = DEG2RAD(M);
-	for (i = 0; i < 10; i++) {
-		E = E + (M + e * sin(E) - E) / (1 - e * cos(E));
-	}
-	E = RAD2DEG(E);
-	return E;
-}
-
-// anomaliePlanet : Permite to have the realAnomalie of the planet
-double anomaliePlanet(double excentricite, double kepler, double T) {
-	double anomalie = sqrt((1 + excentricite) / (1 - excentricite)) * tan(DEG2RAD(kepler) / 2);
-	anomalie = RAD2DEG(atan(anomalie)) * 2;
-	return anomalie;
-}
-
-// distanceSolPlanet : Permite to have the distance between the sun and the planet
-double distanceSolPlanet(double axe, double excentricite, double kepler) {
-	double distance = axe * (1 - excentricite * cos(DEG2RAD(kepler)));
-	return distance;
-}
-
-// longitudeHelioPlanet : Permite to calcul the longitude heliocentric of the planet
-double longitudeHelioPlanet(double L, double anomalieReal, double P) {
-	double anomalieMoy = L - P;
-	if (P > L) {
-		anomalieMoy = anomalieMoy + 360;
-	}
-	double argument = L + anomalieReal - anomalieMoy;
-	if (argument < 0) {
-		argument = argument + 360;
-	}
-	return argument;
-}
-
-// latitudeHelioPlanet : Return the heliocentrique latitude of the planet
-double latitudeHelioPlanet(double argument, double i) {
-	double latitude = sin(DEG2RAD(argument)) * sin(DEG2RAD(i));
-	latitude = RAD2DEG(asin(latitude));
-	if (latitude > 360) {
-		int count = (int)latitude / 360;
-		latitude = latitude - count * 360;
-	}
-	return latitude;
-}
-
-// positionPlanet : Permite to have longitude, latitude and distance heliocentric of the planet
-void positionPlanet(MYSQL *mysql,Planet *astre, struct tm now) {
-	double hourdec = hourdecimal(now.tm_hour, now.tm_min, now.tm_sec);
-	double julien = jourjulien(now.tm_year, now.tm_mon, now.tm_mday, hourdec);
+// azimutMoon : Use many fonctions of astro.c and moon.c for have the azimut of the moon
+double azimutMoon(double year, double month, double day, double hour, double min, double sec, double* latitude, double* longitude) {
+	double hourdec = hourdecimal(hour, min, sec);
+	double julien = jourjulien(year, month, day, hourdec);
 	double T = t(julien);
-	double* A = (double*)malloc(sizeof(double));
-	double* E = (double*)malloc(sizeof(double));
-	double* L = (double*)malloc(sizeof(double));
-	double* I = (double*)malloc(sizeof(double));
-	double* O = (double*)malloc(sizeof(double));
-	double* P = (double*)malloc(sizeof(double));
-	double *stockValues[6] = { A,E,L,I,O,P };
-	equinoxePlanet(mysql, astre->name, stockValues, T);
-	double kepler = keplerPlanet(*P, *L, *E);
-	double anomalieReal = anomaliePlanet(*E, kepler, T);
-	double distance = distanceSolPlanet(*A, *E, kepler);
-	double longitude = longitudeHelioPlanet(*L, anomalieReal, *P);
-	double latitude = latitudeHelioPlanet(longitude + *O, *I);
-	free(A);
-	free(E);
-	free(L);
-	free(I);
-	free(O);
-	free(P);
-	astre->longitude = longitude;
-	astre->latitude = latitude;
-	astre->distance = distance;
-	return astre;
+	double* sideral = sideralTime(T, hour, min, sec);
+	double* oblique = obliquite(T);
+	double longitudeEclip = longitudeEcliptiqueForMoon(T);
+	double latitudeEclip = latitudeEcliptiqueForMoon(T);
+	double* ascensionDroite = TransformInLongitudeEquatorial(longitudeEclip, latitudeEclip, oblique);
+	double* declinaison = TransformInLatitudeEquatorial(longitudeEclip, latitudeEclip, oblique);
+	double angleHoraire = horaireAngle(ascensionDroite, longitude, sideral);
+	double azimut = 0;
+	double decl = DEG2RAD(hourdecimal(*declinaison, *(declinaison + 1), *(declinaison + 2)));
+	angleHoraire = DEG2RAD(angleHoraire);
+	double lat = DEG2RAD(hourdecimal(*latitude, *(latitude + 1), *(latitude + 2)));
+	azimut = sin(angleHoraire) / (cos(angleHoraire) * sin(lat) - tan(decl) * cos(lat));
+	double count = (int)(azimut / M_PI);
+	azimut = RAD2DEG(atan(azimut));
+	if (azimut < 0)
+		azimut = 180 + azimut;
+	else if (azimut > 360)
+		azimut = azimut - 360;
+	printf("Lune azimut : %lf \n", azimut);
+	free(sideral);
+	free(oblique);
+	free(ascensionDroite);
+	free(declinaison);
+	return azimut;
+
 }
 
-void giveName(Planet astre[]) {
-	astre[0].name = "Soleil";
-	astre[0].longitude = 0;
-	astre[0].latitude = 0;
-	astre[0].distance = 0;
-	astre[1].name = "Terre";
-	astre[2].name = "Lune";
-	astre[3].name = "Mercure";
-	astre[4].name = "Venus";
-	astre[5].name = "Mars";
-	astre[6].name = "Jupiter";
-	astre[7].name = "Saturne";
-	astre[8].name = "Uranus";
-	astre[9].name = "Neptune";
-}
-
-int degresToPwm(double degrees) {
-	double value;
-	if (degrees <= 180) {
-		value = degrees + 70;
-		printf("nord");
-	}
-	else {
-		value = degrees - 180 + 70;
-		printf("sud");
-	}
-	int valueInt = (int)value;
-	return valueInt;
-}
-
-int degresToPwm2(double degrees) {
-	double value;
-	if (degrees <= 0) {
-		value = 77 * degrees / 90 + 60;
-		printf("rouge");
-	}
-	else {
-		value = 77 * degrees / 90 + 137;
-		printf("bleu");
-	}
-	int valueInt = (int)value;
-	return valueInt;
-}
-
-void position(Planet *astre) {
-	double x = (astre->distance) * cos(DEG2RAD(astre->longitude));
-	double y = sqrt((astre->distance) * (astre->distance) - x * x);
-	double z = (astre->latitude) * COEFF;
-	x = x * COEFF;
-	y = y * COEFF;
-	if (astre->longitude > 180) {
-		y = -y;
-	}
-	astre->x = x;
-	astre->y = y;
-	astre->z = z;
-}
-
-void getPlanetPosition(Planet * planets)
-{
-	time_t rawtime;
-	struct tm info;
-	time(&rawtime);
-	gmtime_s(&info, &rawtime);
-	info.tm_year = info.tm_year + 1900;
-	info.tm_mon = info.tm_mon + 1;
-
-	MYSQL *mysql = mysql_init(NULL);
-	mysql_options(mysql, MYSQL_READ_DEFAULT_GROUP, "option");
-
-	if (mysql_real_connect(mysql, "localhost", "root", "", "stellarm", 0, NULL, 0))
-	{
-		MYSQL *mysqlShow = mysql_init(NULL);
-		mysql_options(mysqlShow, MYSQL_READ_DEFAULT_GROUP, "option");
-
-		giveName(planets);
-		int count;
-		for (count = 0; count < 10; count++) {
-			if (strcmp("Soleil", planets[count].name) == 0);
-			else if (strcmp("Lune", planets[count].name) == 0) {
-				positionMoon(&planets[count], info);
-			}
-			else if (strcmp("Terre", planets[count].name) == 0) {
-				positionEarth(&planets[count], info);
-			}
-			else {
-				positionPlanet(mysql, &planets[count], info);
-			}
-			position(&planets[count]);
-			//printf("%s %lf %lf %lf \n", planets[count].name, planets[count].longitude, planets[count].latitude, planets[count].distance);
-			//printf("x: %lf y: %lf z: %lf\n", planets[count].x, planets[count].y, planets[count].z);
-		}
-	}
-	else
-	{
-		printf("Une erreur s'est produite lors de la connexion a la BDD!");
-	}
-	mysql_close(mysql);
+// hauteurMoon : Use many fonctions of astro.c and moon.c for have the height of the moon
+double hauteurMoon(double year, double month, double day, double hour, double min, double sec, double* latitude, double* longitude) {
+	double hourdec = hourdecimal(hour, min, sec);
+	double julien = jourjulien(year, month, day, hourdec);
+	double T = t(julien);
+	double* sideral = sideralTime(T, hour, min, sec);
+	double* oblique = obliquite(T);
+	double longitudeEclip = longitudeEcliptiqueForMoon(T);
+	double latitudeEclip = latitudeEcliptiqueForMoon(T);
+	double* ascensionDroite = TransformInLongitudeEquatorial(longitudeEclip, latitudeEclip, oblique);
+	double* declinaison = TransformInLatitudeEquatorial(longitudeEclip, latitudeEclip, oblique);
+	double angleHoraire = horaireAngle(ascensionDroite, longitude, sideral);
+	double hauteur = 0;
+	double decl = DEG2RAD(hourdecimal(*declinaison, *(declinaison + 1), *(declinaison + 2)));
+	angleHoraire = DEG2RAD(angleHoraire);
+	double lat = DEG2RAD(hourdecimal(*latitude, *(latitude + 1), *(latitude + 2)));
+	hauteur = sin(lat) * sin(decl) + cos(lat) * cos(decl) * cos(angleHoraire);
+	hauteur = RAD2DEG(asin(hauteur));
+	printf("Lune hauteur : %lf \n",hauteur);
+	free(sideral);
+	free(oblique);
+	free(ascensionDroite);
+	free(declinaison);
+	return hauteur;
 }

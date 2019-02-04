@@ -3,3 +3,5 @@ OpenGL/stb_image.h
 OpenGL/tinyobj_loader_c.h
 OpenGL/nuklear.h
 OpenGL/nuklear_glfw_gl4.h
+OpenGL/nuklear_glfw_gl3.h
+OpenGL/libmysql.dll
