@@ -318,16 +318,10 @@ void degresToPwm(Servo *servo) {
 
 // degresToPwm2 : Permite to convert altitude on a var for the two others servomoteur
 void degresToPwm2(Servo *servo) {
-	double value;
-	if (servo->degrees <= 0) {
-		value = 77 * (-(servo->degrees)) / 90 + 60;
-		servo->name = "rouge";
-	}
-	else {
-		value = 77 * servo->degrees / 90 + 137;
-		servo->name = "bleu";
-	}
-	servo->pwm = (int)value;
+    double value;
+    value = 77 * servo->degrees / 90 + 137;
+    servo->name = "rouge";
+    servo->pwm = (int)value;
 }
 
 int sizeForString(int value) {
