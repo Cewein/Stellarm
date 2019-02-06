@@ -1,7 +1,8 @@
 #pragma once
-#include <winsock.h>
-#include <string.h>
+#include <winsock2.h>
 #include <MYSQL/mysql.h>
+#include <string.h>
+
 
 char* valuesInsert(char* query, char** value, int size);
 char* valueInsert(char* query, char* value);
